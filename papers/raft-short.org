@@ -1,0 +1,369 @@
+#+TITLE: In Search of an Understandable Consensus Algorithm
+#+URL: usenix.org/system/files/conference/atc14/atc14-paper-ongaro.pdf
+#+TAGS: raft consensus distributedsystems
+#+YEAR: 2014
+
+* Abstract
+Raft is consensus algorithm (CA) for managing a replicated log. Result
+is equivalent to (multi-)Paxos, and it is as efficient as Paxos. It's
+easier to understand than Paxos and provides better foundation for
+achieving the desired outcomes in practice. Studies suggest easier to
+learn for students.
+* Introduction
+CAs allow collection of machines to coordinate and survive failure of
+some members. Crucial for building reliable large-scale software
+systems.
+** History of Paxos
+- Dominated recent conversation in last decade:
+- It's what students learn
+- Most consensus implementations are based on it
+- Difficult to understand and implement
+** Creating Raft
+- High value placed on *understandability*
+- Authors wanted to build a system that developers can not only make
+  work, but intuit *why* it works.
+*** Strategy
+**** Decomposition
+Raft separates leader election, log replication, and safety.
+**** State Space Reduction
+Relative to Paxos, Raft reduces the degree of nondeterminism and the
+ways servers can be inconsistent with each other.
+*** Prior Art
+Raft is similar to Viewstamped Replication
+*** Novel Features
+**** Strong leader
+Log entries only flow from leader to other servers. Simplifies
+management of the replicated log and makes Raft easier to understand.
+**** Leader Election
+Raft uses randomized timers to elect leaders. Fairly simple to
+implement, but makes it possible to resolve conflicts simply and
+rapidly.
+**** Membership Change
+Mechanism for changes the set of servers in the cluster uses a new
+*joint consensus* approach where majorities of two different
+configurations overlap during transitions.
+** Claim
+Raft is superior to Paxos and other CAs. It is more understandable and
+meets the needs of a practical system. It's battle-tested and it's
+safety has been formally specified and proven. Efficiency comparable
+to other CAs.
+* Replicated state machines
+** Good model for solving many fault-tolerance problems in distributed systems
+- Other CAs i.e. GFS, HDFS, and RAMCloud use a separate state machine
+- Replicated state machines typically implement a replicated log. Each node
+  keeps a log which its state machine executes in order.
+- End result: nodes coordinate to ensure their logs will reach
+  consensus.
+** Properties
+*** Safety
+Never returning an incorrect result under all non-Byzantine
+conditions, including network delays, partitions, and packet loss,
+duplication, and reordering.
+*** Availability
+Fully functional as long as any majority of the servers are
+operational and communicating with clients. Cluster of 5 can tolerate
+the failure of any 2.
+*** Timing Agnostic
+Doesn't depend on timing to ensure the consistency of logs. Faulty
+clocks and extreme message delays at worst should only be able to
+cause availability problems.
+*** Majority Action
+A command can complete as soon as a majorty of the cluster has
+responded so that a minority of slow servers need not impact overall
+system performance
+* What's wrong with Paxos?
+** Difficult to understand
+*** Paxos is a layered algorithm
+**** Single-decree Paxos
+- Describes a protocol capable of reaching agreement on a single
+  decision, i.e., a log entry
+- Two parts that are not intuitive and are pretty dense
+**** Multi-Paxos
+- Combines multiple instances of single-decree Paxos to facilitate a
+  series of decisions
+- Claim: it's possible to provide features that multi-Paxos provides
+  in a more intuitive way
+*** No foundation for building practical implementations
+Common pattern that an implementation begins with the intention to
+look like Paxos, then discovers the difficulty in implementing it and
+builds something that is actually not Paxos. This is inefficient and
+those build systems are unproven because they are not Paxos.
+* Designing for understandability
+** Goals
+- Must provide a complete and practical foundation for system building
+- It must be safe always and available under normal conditions
+- Must be efficient for common operations
+- Must be efficient
+** Evaluating understandability
+*** Problem decomposition
+Wherever possible, divide problems into separate pieces that can be
+solved, explained, and understood independently. In Raft, leader
+election, log replication, safety, and membership changes.
+*** Simplify state space by reducing the number of states to consider
+Logs are not allowed to have holes and Raft limits the number of ways
+logs can become inconsistent. This introduces randomness, but this
+actually helps improve understandability because it handles a choice.
+* The Raft consensus algorithm
+Raft elects a leader, which is then responsible for managing the
+replicated log.  Leader accepts log entries from clients, replicates
+them on other servers, and tells servers when it is safe to apply log
+entries to their state machines.
+
+Having a leader simplifies the management of the replicated
+log. Leader can decide where to place new entries without consulting
+other servers and data flow is easy to understand (leader -> other
+nodes).
+** Raft basics
+*** Server states
+- Leader
+Handles all client requests
+- Follower
+Passive, only respond to requests from leaders and candidates
+- Candidate
+Used to elect a new leader
+*** Terms
+- Time is divided into *terms* of arbitrary length
+- Numbered with consecutive integers
+- Each term begins with an *election* in which 1+ candidates try for
+  leader
+- In case of split vote, term ends with no leader and a new term
+  begins
+- A server may or may not observe the activity during a term
+**** Term numbers
+- Each server stores a current term number, increases monotonically
+- When servers communicate, they compare term numbers and update to
+  higher one
+- If a leader has a lower term number, it immediately reverts to
+  follower
+- Leaders reject requests with stale term numbers
+*** Remote Procedure Calls
+Raft only requires 2 RPCs
+**** RequestVote
+Initiated by candidates during elections
+**** AppendEntries
+Initiated by leaders to replicate log entries and to provide a form of
+a heartbeat.
+
+Servers retry RPCs if they do not receive a response in a timely
+manner and issue RPCs in parallel for best performance.
+
+In normal conditions, one follower and the rest are followers.
+** Leader Election
+- Servers begin as followers
+- Remains a follewer as long as it receives valid RPCs from a leader or cand.
+- Leaders send periodic heartbeats (AppendEntries RPCs with no entry)
+- If a follower receives no communication over a period (election
+  timeout), then a new election begions
+*** Beginning an election
+1. Follower increments term
+2. Transitions to candidate
+3. Votes for itself and issues RequestVote RPCs in parallel to other
+   servers
+**** Possible outcomes
+***** Candidate wins the election
+Must receive majority vote, then sends a heartbeat message to the
+other servers
+***** Another server becomes leader
+If candidate receives a heartbeat with a term >= the candidate's term,
+candidate reverts to follower status and recognizes new leader.
+*** Period of time passes with no winner
+If many servers are candidates at the same time, there can be a split
+vote. In this case, each candidate times out and increments its term
+and begins issuing RequestVote RPCs again. This can go on
+indefinitely.
+
+Raft uses randomized election timeouts (150-300ms) to ensure split
+votes are rare and resolved quickly. This makes it so in most cases, a
+single server will time out first, increment its term, and begin a new
+election before the others ever time out.
+** Log replication
+- Clients send reqs to the leader which are to be executed by the
+  servers' state machines
+- The leader appends the command to its log, then issues AppendEntries
+  RPCs to all other servers to replicate the entry.
+- Once a majority have ACKed, the leader applies the entry to its state machine
+  and relays the result to the client.
+- If followers crash or run slowly, or network packets are lost,
+  leader retries AppendEntries RPCs indefinitely
+*** Log format
+Each entry includes state machine command and the term number at the
+time the command was received by the leader. Also includes an index to
+identify its position in the log.
+*** Committing log entries
+The leader *commits* the log entry once a majority have received it.
+** Safety
+So far, the mechanisms described above don't guarantee that each state
+machine executes exactly the same commands in the same order.
+
+Example: a follower could miss a few log entries, become leader, then
+overwrite entries.
+*** Election restriction
+In any leader-based CA, the leader must eventually store all of the
+committed log entries.
+**** Consensus algorithms that don't require leader to have an up to date log
+So they also contain algorithms that allow leaders to identify missing
+entries.  This results in extra mechanism and complexity.
+**** Log entry flow
+Raft guarantees that leaders have all committed entries on their log,
+so *log entries only are go from leader to followers*.
+
+Leaders never overwrite their log entries.
+
+Prevents a candidate from becoming leader unless has all
+entries. Candidate must contact a majority of nodes, which means that
+every committed entry exists somewhere in that majority of nodes.
+**** RequestVote RPC
+The requeste includes info about the candidate's log, and the voter
+denies it if its own log is more up-to-date.
+***** "up-to-date"
+Raft compares the index and term of the last entries. Whichever has
+the higher term is more up-to-date. If they have the same term,
+whichever is longer is more up-to-date.
+*** Committing entries from previous terms
+Leader knows an entry is commited once the entry is stored on a
+majority of nodes.
+**** An edge case
+There exists a situation where an old log entry is stored on a
+majority of servers and can be overwritten by a new leader. (Fig 8).
+
+If a leader server crashes when it has the entries on its log but has
+not committed, a new leader takes over. Then imagine that the first
+leader is re-elected and tries to continue the prior replication. This
+entry has been committed to a majority of servers, but it is not
+committed.
+**** Counting replicas
+The process in which the leader counts followers that have committed
+an entry.
+
+***** Restriction on how leaders commit entries
+Solves the above problem by never commits log entries from previous
+terms by counting replicas. Only log entries from the leader's current
+term are committed by counting replicas. Ahh, this makes sense. You
+can guarantee that a leader is up-to-date for a term, so only allow
+them to commit changes within that term.
+
+Once an entry from the current term has been committed in this way,
+then all prior entries are committed indirectly because of the Log
+Matching Property. There are some situations where a leader could
+safely conclude that an older log entry is committed (for example, if
+that entry is stored on every server), but Raft takes a more
+conservative approach for simplicity.
+
+This provides some understandability. Other CAs require that when a
+leader rewrites an entry from a prior term, it must renumber that
+entry with its term number. Raft instead just restricts leaders to
+only committing entries with their term number. Much simpler.
+
+Makes it easier to reason about entries since they always have the
+same term number across *time* and *logs*. In addition, new leaders
+send fewer log entries from previous terms than in other CAs. Other
+CAs have to more redundant log entries to be renumbered
+before they can be committed.
+*** Safety argument
+leader completeness property ::
+
+Consider a leader of term T who commits an entry, but is not stored by
+some future leader. Consider the smallest term U > T whose leader does
+not store the entry.
+
+1. The committed entry must have been absent from leader U's log at
+   the time of election (leaders nover delete or overwrite entries).
+2. Leader T replicated the entry on a majority of the cluster, and
+   leader U received votes from a majority of the cluster. Therefore
+   at least on eserver both accepted the entry from leader T and voted
+   for leader U.
+3. The voter must have accepted the entry from leader T before voting
+   for leader U otherwise it would have rejected the AppendEntries
+   request from leader T.
+4. The voter still stored the entry when it voted for leader U, since
+   every new leader contained the entry, leaders never remove entries,
+   but followers only do if they conflict with the leader.
+5. The voter granted a vote to leader U, so it follows that leader U's
+   log is at least as up-to-date as the voters'.
+6. So, if the voter and leader U shared the same log term, then leader
+   U's log must have been as long as the voter's. So it's log
+   contained every entry in the voters' log. Contradiction: the
+   voter's log contained the committed entry and leader U was assumed
+   not to.
+7. Otherwise leader U's log would have been longer than the
+   voter's. It had to be larger than T, because the voter's last log
+   term was at least T (because it has the committed early entry from
+   term T). The first leader must have contained the committed entry
+   in its log. By Log Matching Property, leader U's log must contain
+   the committed entry, which is a contradiction.
+8. Leaders of all terms > T must contain all entries from term T that
+   are committed in term T.
+9. Log Matching Property guarantees that future leaders will also
+   contain entries that are committed indirectly.
+*** Follower and candidate crashes
+RPCs to the node will fail. Raft retries indefinitely. It's fine if
+it's run multiple times, because Raft RPCs are idempotent (multiple
+identical requests has the same effect as making a single request).
+
+Ex: node receives an entry it has already committed, but hasn't
+responded. When it gets the same AppendEntries RPC, it will simply
+ignore the entry. Question: Does it send a confirmation to the leader?
+*** Timing and availability
+The system must not produce incorrect results just because something
+happened more quickly or slowly than expected.
+**** Leader election and timing
+Timing is most critical for leader election because leaders commit
+entries.
+Requirement: broadcastTime << electionTimeout << MTBF
+
+broadcastTime :: average time takes a server to send RPCs in parallel
+to every server and receive their responses
+electionTimeout :: how long a follower waits without receiving an
+AppendEntries RPC before switching to a candidate
+MTBF :: average time between failures for a single server
+
+broadcastTime should be an order of magnitude less than
+electionTimeout so that leaders can reilably send heartbeat messages
+required to keep followers from starting elections. electionTimeout
+should be a few order of magnitudes less than MTBF so that the system
+makes steady progress. When the leader crashes, the system will be
+unavailable for the ~the electionTimeout.
+* Cluster membership changes
+** Clusters sometimes need to be configured
+- Could take down one node...
+- Or the whole cluster (but that's major downtime)
+- Manual steps risk operator error
+
+Raft automates configuration changes. It must never be possible for
+two leaders to be elected for the same term.
+
+It isn't possible to atomically switch all the servers at once, so it
+may fragment during the transition.
+** Two-phase approach
+1. Switch to joint consensus
+- Log entries are replicated to all servers in both configurations
+- Any server from either config may serve as leader
+- Agreement (for elections and entry commitments) requires sepaprate
+  majorities from both the old and the new configs
+2. TODO
+* Implementation and evaluation
+** Understandability
+Studied students in Advanced Operating Systems course at Stanford.
+and a Distributed Computing coures and UCB. Raft lecture covered this
+paper, Paxos lecture covered enough te create an equivalent replicated
+state machine.
+
+Even though evaluation favored Paxos (some students had prior
+familiarity), Raft did better.
+** Correctness
+Proofs available in the other Raft paper
+** Performance
+Most important in any CA is when a leader needs to replicate new
+entries. Raft uses minimal number of messages one round-trip from the
+leader to half of the ter.
+* Questions
+- When there's a split vote, how is that broadcast to candidates?
+- At what exact point is an entry committed in a leader's server?
+- The safety argument. I don't entirely understand it.
+- Figure 8. What do authors mean by entries that are committed
+  indirectly?
+- If a follower crashes after it's committed an entry but before it
+  sends confirmation, does it send confirmation after it's back up?
+- Empty AppendEntries RPCs as a way to keep leader alive?
+- Why exactly is it unsafe to update the cluster? How could that lead
+  to two leaders? (revisiting this, I don't understand this question anymore)
