@@ -1,0 +1,27 @@
+#+TITLE: In Search of Stupidity
+#+AUTHOR: Merrill R. Chapman
+#+TAGS: technology entrepeneurship marketing business software
+
+* Follow up reading
+** Must-Reads
+- Apple: The Inside Story of Intrigue, Egomania, and Business Blunders
+- Big Blues: The Unmaking of IBM
+- The Dream Machine: J.C.R. Licklidder and the Revolutions that Made
+  Computing Personal
+- Gates: How Microsoft's Mogul Reinvented an Industry and Made Himself
+  the Richest Man in America
+- Hackers, Heroes of the Computer Revolution
+- Joel on Software
+- Marketing High Technology: An Insider's View
+- The Reckoning
+- Selling Air
+** Other Recommendations
+- Beer Blast: The Inside Story of the Brewing Industry's Bizarre
+  Battles for Your Money
+- On the Firing Line: My 500 Days at Apple
+- Open Source: The Unauthorized White Papers
+- Odyssey (the one by John Sculley)
+- The Product Marketing Handbook for Software
+- The Second Coming of Steve Jobs
+- Once upon a Time in Computerland: The Amazing, Billion-Dollar Tale
+  of Bill Millard
