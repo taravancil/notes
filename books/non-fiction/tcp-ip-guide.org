@@ -14,4 +14,71 @@
 as in data can be centralized and managed
 - performance, balancing
 - entertainment, games
+*** Costs/Disadvantages
+TANSTAAFL = there ain't no such thing as a free lunch
+**** Setup Costs
+Hardware, software, people are tricky and can be expensive.
+**** Undesirable Sharing
+e.g. viruses and worms
+**** Illegal Sharing
+**** Data Security
+poorly-secured network puts critical data at risk
+** Fundamental Network Characteristics
+*** Networking Layers, Models and Architectures
+**** Networking Layers
+Each layer is responsible for a type of task, as well as communication
+with layers above and below it.
+
+Lower layers handle hardware signaling and provide services to the
+higher-level layers. Higher layers implement more abstracted
+functionality i.e. user appliactions.
+**** Networking Models
+Purpose: interoperability. Need to define how layers will be used.
+
+Open Systems Interconnection Reference Model (layers 1-7)
+
+**** Networking Architectures
+Set of rules to describe function of some portion of the stack.
+
+TCP is at layer 4, IP is at layer 3
+*** Protocols: What Are They, Anyway?
+In daily life and in networks: set of rules for communicating
+
+**** Alternative Uses of the Term "Protocol"
+Protocol suites are a stack of layers, but sometimes "protocol" is
+used instead. In fact, this is the case with TCP/IP.
+*** Circuit Switching and Packet Switching Networks
+One way to differentiate networkin tech is based on the method they
+use for determining the path between detween devices.
+
+Two main approaches: set up paths in advance or send data as
+individual data packets over a variable path.
+**** Circuit Switching
+A circuit is set up between two devices which is used for the whole
+communication. Information about the circuit is maintained by the
+network.
+
+The circuit can be fixed (always present), or it may be created on an
+as-needed basis.
+***** Example: Telephone System
+When you call someone and they answer, you establish a circuit
+connection. That circuit functions the same nomatter how many
+intermediate devices are used to carry your voice. Use it while needed
+then terminate the circuit. Next time you call, you get a new circuit.
+**** Packet Switching
+No specific path used for data transfer. Instead data segmenteid into
+packets and sent over the network.
+
+Packets can be routed, combined, or fragmented as required to get them
+to their eventual destination.
+
+The recipient reverses the process: data is read from the packets and
+re-assembled.
+**** Packet Switching vs. Circuit Switching
+***** Shared vs. dedicated network medium
+Phone lines are dedicated so can be used to establish a
+circuit. Doesn't work in LANs, which use a single shared medium and
+baseband signaling and two devices that establish a connection would
+lock out other devices. Makes more sense in that case to packetize
+data and send intermittently.
 * Questions
