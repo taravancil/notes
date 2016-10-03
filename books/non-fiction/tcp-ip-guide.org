@@ -1,0 +1,17 @@
+#+TITLE: TCP/IP Guide
+#+AUTHOR: Charles M. Kozierok
+#+URL: tcpipguide.com
+#+TAGS: networks networking tcp
+
+* Networking Fundamentals
+** Intro to Networking
+*** Benefits
+- connectivity/communication
+- data sharing, no more sneakernets!
+- hardware sharing
+- internet
+- data security and management
+as in data can be centralized and managed
+- performance, balancing
+- entertainment, games
+* Questions
