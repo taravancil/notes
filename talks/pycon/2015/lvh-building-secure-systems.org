@@ -1,0 +1,60 @@
+#+TITLE: Building Secure Systems
+#+AUTHOR: lvh
+#+YEAR: 2015
+#+TAGS: security python systems
+
+* The Problem
+all software has bugs -> some are security bugs -> security bugs are bad
+** Broken because
+- tools don't work
+- corporations mess up
+- universities fail to educate
+* How to Learn About Security
+1. Install software
+2. Try to break it
+3. Learn somthing
+4. Repeat
+
+But we're not trained to think that way - devs are trained to *build*
+not break. We're also not paid to think that way. We have code to
+ship.
+
+* How We Can Fix It
+** Code Review
+- disseminates experience
+- cultivates culture of quality
+** Adversarial Approach
+- in-house (red/blue team)
+- third party audits
+** Automated Testing
+- behavior against bogus certificates
+- unit tests that check middleware
+
+* Meta-conversation
+** Channeling Zooko
+Security is:
+- not perfect vs imperfect
+- not better vs worse
+- this surface vs that surface
+
+attack surface :: all ways attacker can get in
+threat model :: how *will* attackers try to get in
+** Useful Security Proposals
+*** Description
+What are you going to do? Details are important.
+*** Threat Model and Motivation for Attackers
+What are you trying to prevent? How is it addressed now? How will it
+be addressed?
+*** Difference in Attack Surface
+Security tools are not always an improvement, changes the attack surface.
+*** Difference in User Experience
+Ahem, PGP
+** Example Threat Model: Smartphones
+Contain everything and need to be protected. So we have lock screens!
+A bad lockscreen is probably better than none.
+
+Fingerprint vs. passcode, how to choose? Depends on your threat
+model. if you're an activist, you probably shouldn't use biometrics
+because please can force you to unlock, but can't compel you to
+divulge a passcode. Just a random person who probably won't be
+arrested? Biometrics may be a better option.
