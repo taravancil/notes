@@ -1,0 +1,60 @@
+#+TITLE: Kademlia: A P2P Information System Based on the XOR Metric
+#+AUTHOR: Petar Maymounkav, DavidMaziéres
+#+URL: pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+#+TAGS: p2p dht systems
+#+YEAR: 2002
+
+* Introduction
+Kademlia is a p2p distributed hash table (DHT) with desirable features
+not offered by other DHTs. Minimizes the number of config messages
+nodes must send to learn about each other and config info spreads
+automatically as side-effect of key lookups.
+
+Nodes can route queries through low-latency paths. Uses parallel,
+async queries to avoid timeout delays from failed nodes. Resistant to
+some clasess of DDOS.
+
+Important properties of Kademlia are provable using only weak
+assumptions on uptime distributions.
+** Basic Approach
+Same as many other DHTs:
+- keys are opaque, 160-bit quantities
+- each node has a node ID in the 160-bit key space
+- <key, value> pairs stored on nodes with IDs "close" to the key
+- a node-ID-based routing algo allows for efficently locating servers
+  near any target key
+** Kademlia's Innovation
+Most of Kademlia's unique benefits come from use of a novel XOR metric
+for distance between points in the key space.
+
+To locate a node near an ID, Kademlia uses a single routing algo from start to
+finish. Others use one to get near the target then another for the
+last few hops.
+* System Description
+Each node has 160-bit opaque ID. Uses a lookup algorithm to
+successively get "closer" to nodes with the desired ID in
+logarithmically many steps.
+** Node structure
+Like leaves in a binary tree. Position determined by the shortest
+unique prefix of its ID. For a node, divide the tree into a series of
+successively lower subtrees that don't contain the node, highest
+subtree is the other half of the binary tree that *does* contain the
+node. And so on and so on. (See figure 1)
+
+This ensures that each node knows of at least one node in each of its
+subtrees if that subtree contains a node. Thus any node can locate any
+other node by its ID. (See figure 2)
+*** Example
+The node with ID 0011, the subtrees are circled and consist of all
+nodes with prefixes 1, 01, 000, and 0010.
+
+* Questions
+** How does XOR being symmetric provide this property?
+"XOR is symmetric, allowing Kademlia participants to receive lookup
+queries from precisely the same distribution of nodes contained in
+their routing tables. Without this property, systems such as Chord [5]
+do not learn useful routing information from queries they
+receive. Worse yet, asymmetry leads to rigid routing tables."
+- I don't get this ^
+** What's an opaque ID?
+** What does it mean to say that "the subtrees are circled"?
