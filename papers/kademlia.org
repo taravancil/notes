@@ -56,5 +56,9 @@ their routing tables. Without this property, systems such as Chord [5]
 do not learn useful routing information from queries they
 receive. Worse yet, asymmetry leads to rigid routing tables."
 - I don't get this ^
+*** Answer
+OK, so part of the importance of XOR being a symmetric operation is
+this: A ^ B = B ^ A, so when used to calculate
+distance, it's the case that distance A => B = distance B => A.
 ** What's an opaque ID?
 ** What does it mean to say that "the subtrees are circled"?
