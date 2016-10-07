@@ -40,7 +40,7 @@ often reported as "sluggish".
 Last few miles ususally introduce most latency because local ISP must
 route cables through neighborhood and to a local routing node.
 
-Do a `traceroute` to see this in action. The first hop several hops
+Do a traceroute to see this in action. The first hop several hops
 are the local routing.
 *** Bandwith in Core Networks
 Metal wires are subject to higher signal loss, electromagnetic
@@ -87,13 +87,13 @@ Client and server must agree on a number of variables before
 exchanging app data.
 
 1. SYN
-Client picks a random sequence number `x` and sends a SYN packet (may
+Client picks a random sequence number x and sends a SYN packet (may
 have other configs too)
 2. SYN ACK
-Server increments `x` by one, picks another randow sequence number
-`y`, appends its own options, sends response.
+Server increments x by one, picks another randow sequence number
+y, appends its own options, sends response.
 3. ACK
-Client increments `x` and `y` by one and completes the handshake by
+Client increments x and y by one and completes the handshake by
 sending ACK packet
 
 Now the client can immediately begin to send app data, but server must
@@ -153,7 +153,7 @@ available bandwidth on their network path.
 
 Time to reach cwnd size of size N:
 
-`Time = RTT x [log<sub>2</sub>(N / inital cwnd)]
+Time = RTT x [log<sub>2</sub>(N / inital cwnd)]
 ***** Decreasing the Congestion Window
 Decrease roundtrip time C <-> S (move geographically closer), also
 ensure taht the initial congestion window is set to teh RFC 6928 value
@@ -209,7 +209,7 @@ First of all, upgrade your hosts. Then:
   better throughput
 - Use TCP Fast Open to send some data in the initial SYN packet
 
-*Note: `ss` is good tool for inspecting stats on open sockets`
+*Note: ss is good tool for inspecting stats on open sockets*
 **** Tuning App Behavior
 - Send less bits
 - Decrease travel distance
