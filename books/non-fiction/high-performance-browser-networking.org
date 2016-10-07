@@ -1,0 +1,9 @@
+#+TITLE: High Performance Browser Networking
+#+AUTHOR: Ilya Grigorik
+#+YEAR: 2013
+#+TAGS: web browsers networking http http/2 spdy performance
+
+* Networking 101
+* Performance of Wireless Networks
+* HTTP
+* Browser APIs and Protocols
