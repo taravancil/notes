@@ -4,6 +4,68 @@
 #+TAGS: web browsers networking http http/2 spdy performance
 
 * Networking 101
+** Primer on Latency and Bandwidth
+*** Speed Is a Feature
+Faster sites lead to:
+- better user engagement
+- better user retention
+- more conversions
+
+- latency :: time from source sending a packet to destination receiving
+it
+- bandwidth :: maximum throughput of a logical or physical communication
+path
+
+*** Components of Latency
+- propagation delay :: time from sender -> receiver, function of
+  dist/velocity with which signal propagates
+- transmission delay :: time required to push packet's bits into the
+  link, function of the packet's length and data rate of link
+- processing delay :: time required to process packet header, check
+  for bit-level errors, determine destination
+- queuing delay :: time packet waits in queue until it can be
+  processed
+
+Total latency is sum of ^.
+
+*Note: network data rates measured in bits per second (bps),
+non-network equipment are typically shown in bytes per second (Bps).
+
+So to put a 10MB file on the wire over a 1Mbps link requires 80s. 10MB
+= 8e6 * 10 bits = 8e7 bits => 8e7 bits / 1e6 bits/s = 80 s*
+
+Humans tend to notice lag once a delay after 100-200ms. > 300ms is
+often reported as "sluggish".
+**** Last-Mile Latency
+Last few miles ususally introduce most latency because local ISP must
+route cables through neighborhood and to a local routing node.
+
+Do a `traceroute` to see this in action. The first hop several hops
+are the local routing.
+*** Bandwith in Core Networks
+Metal wires are subject to higher signal loss, electromagnetic
+interferenc, and maintenance costs than optical fiber. Optical fiber
+mostly used for long-distance hops.
+
+Optical fiber has bandwidth advantage b/c fiber can carry different
+wavelengths via wavelength-division multiplexing (WDM), so total
+bandwidth of a fiber link is multiple of per-channel data rate and
+multiplexed channel.
+*** Bandwidth at Network Edge
+Bandwidth capacity at edges is much worse than core.
+*** Delivering Higher Bandwidth and Lower Latencies
+Not cheap, but we can add more fibers into existing fiber-optic links,
+deplay more links across congested routes, improve WDM
+techniques. Bandwidth *can* be improved as needed.
+
+Latency is a different story. Quality of fiber can be improved to get
+closer to speed of light, but not much room for improvement. We can
+make distances shorter, but laying new cables is costly and sometimes
+unrealistic due to political tensions.
+
+Goals: hide latency through caching, pre-fetching, reduce round trips,
+move data closer the client.
 * Performance of Wireless Networks
 * HTTP
 * Browser APIs and Protocols
+* Questions
