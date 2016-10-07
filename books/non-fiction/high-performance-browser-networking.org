@@ -65,7 +65,158 @@ unrealistic due to political tensions.
 
 Goals: hide latency through caching, pre-fetching, reduce round trips,
 move data closer the client.
+** Building Blocks of TCP
+IP provides host-to-host routing, TCP provides abstraction of a
+reliable network running over unreliable channel while hiding
+complexit of network communication from applications:
+- retransmission of lost data
+- in-order delivery
+- congestion control
+- avoidance
+- data integry
+- more...
+
+Working with a TCP stream gives guarantee that all bytes that are sent
+will be identical to bytes received and will be received in-order. So
+TCP designed for reliability, not timely delivery.
+
+HTTP could use UDP or any other transport protocol, but that's not
+suited to many of the web's use cases.
+*** Three-Way Handshake
+Client and server must agree on a number of variables before
+exchanging app data.
+
+1. SYN
+Client picks a random sequence number `x` and sends a SYN packet (may
+have other configs too)
+2. SYN ACK
+Server increments `x` by one, picks another randow sequence number
+`y`, appends its own options, sends response.
+3. ACK
+Client increments `x` and `y` by one and completes the handshake by
+sending ACK packet
+
+Now the client can immediately begin to send app data, but server must
+wait to receive ACK before it sends anything.
+
+Implication: for any new connection, 1 full roundtrip of latency is
+required before any app data can be sent, 1.5 roundtrips for the
+server to send anything.
+
+**** TCP Fast Open
+Aims to eliminate latency penalty of opening a new TCP connection by
+allowing data transfer in the SYN packet.
+
+Limitations:
+- limits on max size of payload in the SYN packet
+- only some types of HTTP reqs can be sent
+- only works for repeat conns (requires a cookie from prior
+connection)
+
+Google data suggests TFO can decrease HTTP latency by 15%, page load
+time by 10% on average and up 40% in high-latency situations.
+*** Congestion Avoidance and Control
+**** Congestion Collapse
+When roundtrip time exceeds maximum retransmission interval for any
+host, that host will introduce more and more datagrams into the
+network. Eventually all buffers become full and packets will be
+dropped.
+
+This wasn't a problem in ARPANET b/c most nodes had uniform bandwidth,
+but this didn't hold for long.
+**** Flow Control
+Prevents sender from overwhelming receiver. Receiver advertises its
+receive window (rwnd) = size of available buffer space. Every ACK
+packet in TCP connection lifetime sends a new rwnd value which allows
+for dynamic adjusting.
+***** Window Scaling (RFC 1323)
+Allows us to raise max rwnd from 65,535 bytes to 1GB.
+**** Slow-Start
+Flow Control prevents senders and receivers from overwhelming each
+other, but doesn't stop the network itself from being
+overwhelmed. Example: you're streaming video and someone on your
+network downolads a big software update. Available bandwidth available
+drops, and the video server needs to adjust data rate, otherwise it
+will keep sending packets that will get stuck at a gate way. Not an
+efficient use of the network.
+
+- congestion window size (cwnd) :: sender-side limit on amount of data
+  sender can have in flight before receiving an ACK
+
+cwnd is not exchanged between client or server. It's private to the
+server. Max amonut of data in flight (not ACKed) must be < the min of
+rwnd and cwnd. Start slow, then grow the window size as packets are
+ACKed. So a omodern server can send 10 segments to client, but must
+wait for an ACK, for every ACK it can increase its cwnd by one
+segment. The client and server will quickly converge on the max
+available bandwidth on their network path.
+
+Time to reach cwnd size of size N:
+
+`Time = RTT x [log<sub>2</sub>(N / inital cwnd)]
+***** Decreasing the Congestion Window
+Decrease roundtrip time C <-> S (move geographically closer), also
+ensure taht the initial congestion window is set to teh RFC 6928 value
+of 10 segments.
+***** Slow-Start Restart
+This mechanism resets cwnd for long-lived connections. May be
+beneficial to disable htis if your app relies on long-lived HTTP
+conns.
+**** Congestion Avoidance
+Packet loss is a given b/c in TCP it's a feedback
+mechanims. Slow-statr inits the connection with conservative window
+and for every roundtrip doubles the amonut of data in flight until >
+receiver's rwnd or a packet is lost, when congestion avoidance takes
+over.
+
+Assumption: packet loss indicates some sort of congestion.
+*** Bandwidth-Delay Product
+The optimal sender and receiver window sizes must vary based on RTT
+and target data rate between them. Remember that max amount of
+in-flight data must be < min(cwnd, rwnd).
+
+But if sender or receiver is regularly forced to wait for ACKs, this
+creates a gap in data flow. So window sizes should be just big enough
+so that each can continue sending data until an ACK arrives back.
+*** Head-of-Line Blocking
+TCP packets have sequence #s and must be delivered in-order. If
+recevier is missing a packet, the subsequent packets are held in the
+queue until the lost packet arrives. This is head-of-line blocking
+(HOL).
+
+This delay is a tradeoff we choose for not needing to handle packet
+reordering and reassembly at application layer
+
+- jitter :: unpredictable latency variation in packet arrival times
+  caused by head-of-line blocking
+
+Some apps don't reed reliable or in-order delivery or are jitter
+sensitive should use UDP, e.g., online multiplayer
+*** Optimizing for TCP
+**** Core Principles
+- TCP three-way handshake introduces RT of latency
+- TCP slow-start is apllied to every new connection
+- TCP flow and congestion control regulate throughput for all conns
+- TCP throughput is regulated by current congestion window size
+
+The data transfer rate is most-often limited by RTT. Bandwidth will
+continue to increase, so latency is the limiting factor in most cases.
+**** Tuning Server Configuration
+First of all, upgrade your hosts. Then:
+- Increase TCP's initial congestion window
+- Disable slow-start restart for long-lived conns
+- Enable window scaling to allow high-latency connections to achive
+  better throughput
+- Use TCP Fast Open to send some data in the initial SYN packet
+
+*Note: `ss` is good tool for inspecting stats on open sockets`
+**** Tuning App Behavior
+- Send less bits
+- Decrease travel distance
+- Reuse TCP connections
 * Performance of Wireless Networks
 * HTTP
 * Browser APIs and Protocols
 * Questions
+** Bandwidth-Delay Product
+Don't understand the formula for determining optimal cwnd and rwnd values.
