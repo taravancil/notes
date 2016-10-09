@@ -1,0 +1,56 @@
+#+TITLE: Economies of Scale in Peer-to-Peer Networks
+#+AUTHOR: David Rosenthal
+#+YEAR: 2014
+#+URL: http://blog.dshr.org/2014/10/economies-of-scale-in-peer-to-peer.html
+#+TAGS: economics incentives p2p cloud
+
+* Economies of Scale
+Argues that economies of scale result in further centralization of
+resources (much like what's happened with Bitcoin mining).
+
+"The advantages of P2P networks arise from a diverse network of small,
+roughly equal resource contributors." (#NotAllP2PNetworks lol)
+
+"When new, more efficient technology is introduced, thus reducing the
+cost per unit contribution to a P2P network, it does not become
+instantly available to all participants. As manufacturing ramps up,
+the limited supply preferentially goes to the manufacturers best
+customers, who would be the largest contributors to the P2P
+network. By the time supply has increased so that smaller contributors
+can enjoy the lower cost per unit contribution, the most valuable part
+of the technology's useful life is over."
+* Trust
+He admits that privacy is easily solved by sharding and encrypting
+data. But brings up a new problem:
+
+"The system cannot trust the peers claiming to store the shards of the
+encrypted data but must verify that they actually are storing
+them. This is a resource-intensive process."
+* My Thoughts
+Ok, I don't believe this post is all that relevant to p2p data
+storage/transfer services.
+** Two categories of p2p networks - this is an important distinction
+Proof of work adds an interesting characteristic to a decentralized
+network like Bitcoin - it *does* make the network vulnerable to
+centralization because the work done by miners is what defines the
+value of the network. Whereas a p2p network that exists to enable data
+sharing does not have this same concern because the value lies in peer
+discovery, faster transfers, no censorship. As long as the cloud providers are
+completely pluggable, it doesn't matter that a few massive
+competitors will emerge and dominate the market. In fact we
+can expect this (economies of scale), but as long as peers we can do
+peer discovery and data transport without relying on a central party,
+we still get the interesting properties that a decentralized network provides.
+** On Trust
+If a user absolutely needs a resource to be available, then a user can
+pay more to go through the resource-intensive processes to guarantee
+that the resource is available. But we don't even do that with cloud
+storage providers now. Instead, we favor low-cost solutions like
+google photos or dropbox, because there's still enough demand and thus
+competition to encourage these providers to be trustworthy. Sometimes we
+even duplicate resources on our own hardware or across many cloud
+providers. I don't believe this approach is problematic, rather it's a
+small inconvenience we incur for free/low-cost storage. I think we can
+expect a similar pattern to emerge in p2p data storage systems.
+
+-tbv
