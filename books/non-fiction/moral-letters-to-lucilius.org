@@ -1,4 +1,4 @@
-#+TITLE Moral Letters to Lucilius
+#+TITLE: Moral Letters to Lucilius
 #+AUTHOR: Seneca
 #+YEAR: 65-69?
 #+TAGS: philosophy seneca stoicism
