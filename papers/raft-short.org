@@ -357,27 +357,27 @@ Most important in any CA is when a leader needs to replicate new
 entries. Raft uses minimal number of messages one round-trip from the
 leader to half of the ter.
 * Questions
-- (answered) When there's a split vote, how is that broadcast to candidates?
+1. (answered) When there's a split vote, how is that broadcast to candidates?
 It's not! In the case that there's a split vote, neither candidate
 becomes the leader and a new election begins.
-- (answered) At what exact point is an entry committed in a leader's server?
+2. (answered) At what exact point is an entry committed in a leader's server?
 When the last AppendEntry RPC succeeds, that is, when a majority of
 followers confirm that they've commited the entry. Can't be any
 earlier because that's premature, can't be any later because imagine
 what it would imply if the leader died before it commited the
 entry. Then the followers would be ahead of the leader. Ah! That's no good.
-- The safety argument. I don't entirely understand it.
-- (answered) Figure 8. What do authors mean by entries that are committed
+3. The safety argument. I don't entirely understand it.
+4. (answered) Figure 8. What do authors mean by entries that are committed
   indirectly?
 Once the most entry is commited by counting replicas, the prior
 entries are commited indirectly, because of the log matching property:
 
 "If two entries in different logs have the same index and term, then
 the logs are identical in all preceding entries"
-- (answered) If a follower crashes after it's committed an entry but before it
+5. (answered) If a follower crashes after it's committed an entry but before it
   sends confirmation, does it send confirmation after it's back up?
 No. Once it's alive again, it will receive later AppendEntry RPCs from the
 leader and then just converge on the leader's state.
-- Empty AppendEntries RPCs as a way to keep leader alive?
-- Why exactly is it unsafe to update the cluster? How could that lead
+6. Empty AppendEntries RPCs as a way to keep leader alive?
+7. Why exactly is it unsafe to update the cluster? How could that lead
   to two leaders? (revisiting this, I don't understand this question anymore)
