@@ -21,7 +21,7 @@ goals are not aligned with change.
 ** Dev team lingo for making changes
 It's just a:
 - Feature addition
-- Flag fligs
+- Flag flips
 - UI change
 - 20% experiment
 ** Information asymmetry
