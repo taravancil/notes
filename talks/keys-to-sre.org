@@ -28,14 +28,14 @@ It's just a:
 Dev teams know the code the best, but ops team does not, so this leads
 to some tensions.
 
-Conflict is *not* inevitable! SRE doesn't attempt to assess laurch
+Conflict is *not* inevitable! SRE doesn't attempt to assess launch
 risk, or avoid all outages or set release policy.
 ** Google's Error Budgets
 *** SLA (Service Level Agreement)
 An agreement/objective for how reliable a system needs to be. Once you
 define it, you implicitly are defining an error budget too.
 
-Pacemakers anti-lock braking systems need 99+% SLA.
+Pacemakers, anti-lock braking systems need 99+% SLA.
 
 Computers aren't 100% reliable, so maybe users won't notice when our
 services aren't 100% reliable.
@@ -43,12 +43,12 @@ services aren't 100% reliable.
 Change is #1 cause of outage and launches are big source of
 change. Solution: spend error budget on launches!
 **** The Rule
-If service is within SLA, launch away. Cleary dev is doing a good job.
+If service is within SLA, launch away. Clearly dev is doing a good job.
 
 If service not within SLA, launch the freeze until you earn back the
 error budget.
 
-This rule is crucial for alining incentives between devs and
+This rule is crucial for aligning incentives between devs and
 ops. They are no longer fighting against each other's goals (devs: to
 change things, ops: to not change things), but instead against the
 Rule and the best way to fight the rule is to collaborate.
@@ -62,7 +62,7 @@ just push through it.
 This is also an incentives problem.
 ** 6 Rules
 *** 1. Common staffing pool
-One more SRE = one less developer. The more ops work, teh fewer
+One more SRE = one less developer. The more ops work, the fewer
 features, so it's sort of a self-regulating system.
 *** 2. SRE hires only coders
 They speak the same language as devs, they know what computers can do,
@@ -90,7 +90,7 @@ when things inevitably go wrong?
 **** Wheel of misfortune
 Pie chart of things that have gone wrong and an approximate frequency
 distribution of how often they occurred.
-*** Prevent recurrenc
+*** Prevent recurrence
 1. Handle the event
 2. Write post-mortem
 3. Reset
@@ -100,4 +100,3 @@ goal, so we focus on process and technology instead.
 
 Create a timeline, get the facts, and create bugs for all followup
 work.
-
