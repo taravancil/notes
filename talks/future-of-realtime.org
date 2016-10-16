@@ -1,0 +1,52 @@
+#+TITLE: The Future of Realtime Web Applications
+#+AUTHOR: GUillermo Rauch
+#+YEAR: 2014
+#+TAGS: node realtime web sockets cloud performance
+#+URL: https://www.youtube.com/watch?v=_8CykecwKhw
+
+* Defining Realtime Web Apps
+1. Data updates reflected with minimal latency. The user must feellike
+the data is not stale.
+2. Data updates automatically without requiring interaction.
+
+Can be compacted into two requirements:
+
+1. Fast
+2. Self-updating
+** Example: a stock ticker
+How long should our long-polling delay be? It depends. While whis
+model is self-updating, it's not necessarily fast and sometimes
+reflects stale data. Doesn't fit our realtime definition.
+
+Server is the source of truth, so why do we make the client request?
+That introduces more latency.
+* How do we build realtime web apps?
+1. Reduce latency - more CDNs closer to the users
+2. Increase server capacity
+
+Remember, realtime is about the user experience, not the underlying
+implementation.
+
+Limiting factor is how fast data can get to the client and how
+realtime your app is. Thus realtime is not binary, rather a gradient.
+** Handling reconnection
+Network conditions will degrade, but we still need to make sure data
+flows. How do we make an app self-updating even under poor network
+conditions? We need to give users feedback when we're reconnecting.
+** State reconciliation
+What happens if we come back to a session hours, or even weeks later?
+*** Session expiration
+*** User login change (between tabs, for example)
+*** Large data delta (being away from a news feed for a long time)
+May not make sense to send the whole data in this case.
+* Initial load times
+We can't forget that JS is a burden on the user's device, and this can
+be especially painful for the initial load. We mustn't forgo
+server-side rendering
+* Remember that TCP uses Slow-Start
+The receivers receive window increases with each round trip, but
+starts out small, so the first 14kb are very important. How can we use
+them to make the app feel snappy?
+* Using JavaScript to mask latency
+JS allows us to optimistically render and this greatly improves the
+user experience.
