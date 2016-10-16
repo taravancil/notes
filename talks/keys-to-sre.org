@@ -1,0 +1,103 @@
+#+TITLE: Keys to SRE
+#+AUTHOR: Ben Treynor
+#+YEAR: 2014
+#+TAGS: sre devops ops
+#+URL: https://www.youtube.com/watch?v=n4Wf14e2jxQ
+
+* Why have an SRE team?
+Reliability is most important feature
+** Reliability is easy to take for granted
+Easy to not notice when things are working
+- Characterized by an absence of errors
+- By time a service becomes unstable, a number of things have failed
+- Need to work at reliability all the time, not just when everything's on fire
+* Team motivations
+Devs: want to build cool features and see them adopted
+
+Ops: make sure things don't blow up (especially on their watch)
+
+There's a conflict here: devs want to move fast, where ops peoples'
+goals are not aligned with change.
+** Dev team lingo for making changes
+It's just a:
+- Feature addition
+- Flag fligs
+- UI change
+- 20% experiment
+** Information asymmetry
+Dev teams know the code the best, but ops team does not, so this leads
+to some tensions.
+
+Conflict is *not* inevitable! SRE doesn't attempt to assess laurch
+risk, or avoid all outages or set release policy.
+** Google's Error Budgets
+*** SLA (Service Level Agreement)
+An agreement/objective for how reliable a system needs to be. Once you
+define it, you implicitly are defining an error budget too.
+
+Pacemakers anti-lock braking systems need 99+% SLA.
+
+Computers aren't 100% reliable, so maybe users won't notice when our
+services aren't 100% reliable.
+*** What do you spend your budget on?
+Change is #1 cause of outage and launches are big source of
+change. Solution: spend error budget on launches!
+**** The Rule
+If service is within SLA, launch away. Cleary dev is doing a good job.
+
+If service not within SLA, launch the freeze until you earn back the
+error budget.
+
+This rule is crucial for alining incentives between devs and
+ops. They are no longer fighting against each other's goals (devs: to
+change things, ops: to not change things), but instead against the
+Rule and the best way to fight the rule is to collaborate.
+* Ops Overload, Staffing
+Have a poorly-functioning system? Sure, you can throw manual labor at
+it, but that *sucks*.
+
+It's tempting, especially when business goals are pushing ops team to
+just push through it.
+
+This is also an incentives problem.
+** 6 Rules
+*** 1. Common staffing pool
+One more SRE = one less developer. The more ops work, teh fewer
+features, so it's sort of a self-regulating system.
+*** 2. SRE hires only coders
+They speak the same language as devs, they know what computers can do,
+and they get bored easily.
+*** 3. 50% Cap on Ops work
+If you succeed, work scales with traffic. Coding reduces work/traffic
+ratio. Have to leave enough time for serious coding.
+*** 4. Keep dev team in rotation
+Make sure the dev team sees the product in action. Nothing builds
+consensus on the priority of bugs like a couple of sleepless
+nights. About 5%. Devs will fight this, but it's important they do it.
+*** 5. Excess operations load goes to dev teams
+Also a self-regulating system
+*** 6. SRE portability
+SRE's are portable between projects and organizations. No requirement
+for them to stay on a project if they don't want to. Especially if
+there's tension between the SRE team and devs. If they're not
+effective, let the team dissolve! Give ops responsibilities to devs.
+* Outages are inevitable
+Not fun, but inevitable
+** Minimizing damage
+*** Make outage as short as possible
+Requires good diagnostics and practice ahead time -- what *will* we do
+when things inevitably go wrong?
+**** Wheel of misfortune
+Pie chart of things that have gone wrong and an approximate frequency
+distribution of how often they occurred.
+*** Prevent recurrenc
+1. Handle the event
+2. Write post-mortem
+3. Reset
+**** Post-morten philosophy
+Post-mortems are blameless. People were trying their best to reach the
+goal, so we focus on process and technology instead.
+
+Create a timeline, get the facts, and create bugs for all followup
+work.
+
