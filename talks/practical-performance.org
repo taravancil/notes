@@ -1,0 +1,37 @@
+#+TITLE: Practical Performance (Polymer Summit 2016)
+#+YEAR: 2016
+#+TAGS: performance web
+
+* Demo
+Using Paul Irish's mom's WordPress site, let's figure out how to make
+it faster. When does .onload happen?
+** Bundle JS into one <script>
+Increased initial load time from 9 -> 11s
+** <script defer>
+No noticeable change
+** Group stylesheets together in <head> before any <script>
+No noticeable change
+** Minify JS and CSS
+9 -> 7.6s
+** All 4 fixes at once?
+7.5s
+* Can we measure better than just using .onload?
+First paint, perception of speed, and time to interaction are more
+useful
+** Inverting the process
+1. Measure User perceivable effect
+2. Profile primary Cost
+3. Diagnose unoptimized Behavior
+4. Identify root Cause
+5. Attempt fixes
+
+Identify when the first paint happens. What are the render-blocking
+resources?
+
+Chrome used to block layout rendering if styles were found in <body>,
+but as of this summer, that's no longer the case, and putting styles
+in the <body> can be a big win.
+* Lessons
+- If you apply generif perf techniques blindly, expect mixed results
+- Measure and diagnose the situation before guessing
+- Use metrics!
