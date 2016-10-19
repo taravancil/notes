@@ -1,0 +1,37 @@
+#+TITLE: Redemption from Callback Hell
+#+YEAR: 2013
+#+TAGS: node javascript callbacks async promises
+#+URL: https://www.youtube.com/watch?v=hf1T_AONQJU&feature=youtu.be
+
+* The Problem
+To achieve asynchronicity in JS, we use callbacks
+** The Problem with Callbacks
+** No returns
+** No throwing errors
+You depart from the call stack, so no one's there to catch the erorr!
+
+if (err) throw err = bad
+** No Stack
+** No Guarantees
+How many times does your callback get called? Is it called with the
+same arguments each time?
+* The Future: ES6 Generators
+- First-class coroutines
+- Suspend execution context
+- Small API (yield and .next())
+* The Now: Promises
+** How Promises Came to be in JS
+jQuery team implemented a icky version of commonJS Promises. Then
+ember came around and tried to implement, and Domenic was not
+happy. See [[https://gist.github.com/domenic/3889970][You're Missing the Point of Promises]]. Domenic then made a
+Promises test suite.
+** What Exactly is a Promise?
+An asynchronous object, that at some point in the future will have a
+value.
+*** Function Handlers
+.then(), .catch() is an analog to try, catch.
+** What Promises Offer
+Asynchronicity and a call stack! And guarantees. All the things
+callbacks don't provide.
+
+Also provides much more readable code.
