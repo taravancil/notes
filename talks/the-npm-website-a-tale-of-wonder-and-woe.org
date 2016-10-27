@@ -1,0 +1,41 @@
+#+TITLE: The npm Website: a Tale of Wonder and Woe (and Wombats!)
+#+AUTHOR: Raquel Vélez
+#+YEAR: 2016
+#+URL: https://www.youtube.com/watch?v=uAT7MJnHnMs
+
+* Overview of npm
+People started using Node and npm A LOT. This was unexpected. Dark
+period in 2013 where npm went down a lot.
+
+In 2014, npm decided to become a company. Raquel was the first
+employee. The first iteration of the website existed in 2010 and was a
+crummy little landing page. This was fine for 18 months, until in
+2012, npm came packaged with Node.
+
+So very quickly they needed to implement things like search! Raquel is
+sad to say that this is still basicall the same search tool that is
+used today.
+
+When you have a small team (that is 1 or 2 ppl working on a site),
+something interesting happens when you bring on new ppl. The codebase
+becomes an "archeological dig site". You can see what was done, but
+it's difficult to understand what influenced those decisions.
+* Testing for Improving Confidence
+npm started with unit tests, it wasn't enough. They have confidence in
+nemo.js (by the PayPal team), which is as wrapper around Selenium.
+* Modularity Is About Trust
+Using a module means you trust the module's author.
+
+Example: npm implemented a module for parsing markdown and every 36
+hoursish the site would crash due to a massive memory leak. The module
+authors never discovered this because they never had users who
+operated at npm's scale.
+* Open Source !== Community-Responsive
+npm's team was small and didn't have bandwidth to move quickly enough
+to respond to community demands.
+
+They wer also using Travic CI, which would put them in the queue with
+other public repos, so even if they were pushing a security fix, it'd
+take up to an hour to publish the fix, which is unacceptable. So they
+did an experiment. They made a private fork of their website. Only 2
+people noticed.
