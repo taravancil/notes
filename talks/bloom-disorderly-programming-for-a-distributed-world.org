@@ -1,0 +1,37 @@
+#+TITLE: Bloom: Disorderly Programming for a Distributed World
+#+YEAR: 2016
+#+URL: https://www.youtube.com/watch?v=J9-zYJP7zrM
+
+* Disorderly Programming
+** The State of the Art Today
+Computation and memory are separate, instructions are ordered. In fact
+order is pervasive in this model (Von Neumann model).
+** Dist. Systems and Order
+In dist. systems order is:
+- expensive to enforce
+- often unnecessary
+- easy to get wrong
+** What Is Disorderly Programming?
+Computation as transformation on collections.
+
+All state is data, all data is uniformly represented, and all
+computation describes a continuous query over that data.
+
+- All state is unordered collections (like db tables)
+- Login is unordered, ("bag of rules")
+- We assume all computation statements are independent, so we get
+concurrency
+- If a programmer wants to control order, they must do so explicitly
+(authors believe that if a programmer wants order, they should have to
+think hard about it)
+* The Bloom Programming Language
+** BUD: Bloom Under Development
+- Ruby internal DSL
+- Set comprehension style of programming
+- Declarative semantics
+** Operation Model
+Monotonic logic doesn't rely on order. Non-monotonic logic is blocking!
+* CALM Analysis and Visualization
+- asynchrony => loss of order
+- nonmonotonicity => order-sensitivity
+- asynchrony + nonmonotonicity => inconsistency
