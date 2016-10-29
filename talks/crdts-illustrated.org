@@ -1,0 +1,43 @@
+#+TITLE: CRDTs Illustrated
+#+AUTHOR: Arnout Engelen
+#+YEAR: 2015
+#+URL: https://www.youtube.com/watch?v=9xFfOhasiOE
+
+* Goal
+Make it easier to achieve eventual consistency in dist. systems
+* Rules for Operation-Based CRDTs
+1. All concurrent operations must commute:
+
+(x - 4) - 3 == (x - 3) -4
+(x * 2) - 1 != (x - 1) * 2
+
+2. Updates must be applied exactly once
+But how do we know if an updates been delivered and acknowledged? We
+have to pick one of:
+
+- At most once delivery (fire & forget)
+- At least once delivery (retry)
+
+Exactly once delivery is generally impossible when partitions happen,
+but exactly once delivery *semantics* are possible! By making sure
+that processing the same message again has no effect (idempotence).
+
+3. Updates must be applied in order (the order they were sent from one
+origin)
+* Rules for State-Based CRDTs
+A node does an operation, updates it's state, then sends its state
+across the network, as opposed to sending the operation like with
+operatiion-based CRDTs.
+
+1. Allow retransmissions
+
+But this means the merge function should be idempotent
+
+2. Output must be independent of the order of merges
+
+In other words, the merge function is commutative and associative
+
+3. We need a concept of "going forward" (growing, clocks)
+
+4. Updates and merges always "go forward", or rather result in an
+increase in magnitude
