@@ -1,0 +1,37 @@
+#+TITLE: Planning for Performance: PRPL
+#+AUTHOR: Sam Saccone
+#+YEAR: 2016
+#+URL: https://www.youtube.com/watch?v=RWLzUnESylc
+#+TAGS: web performance
+
+Average mobile user not on a $600 phone. Average android deviced has
+<= 1GB or RAM. Average load time on mobile is 19 seconds :O
+
+* HTTP/2 Server Push + ServiceWorker
+** First Load
+Browser requests to server, browser scans document and sees that
+server has already pushed critical resources.
+** Next Load(s)
+Don't need to hit server, SW intercepts request and delivers cached
+assets.
+* Network Takeaways
+Preload good for moving start download time of an asset to the initial
+request.
+
+H2 Push good for cutting out a full RTT if you have SW support.
+* Measuring and Optimizing JS Parse and Render
+For 300kb of JS, on lower-end devices up to 500ms!
+
+In Canary, V8 internal metrics in timeline!
+** Debugging a Bundle
+*** Webpack Bundle Analyzer
+Understand your bundles with a visualization
+** Code Splitting Patterns
+- Webpack aggressive splitting
+- Polymer CLI per route fragments
+- Angular Lazy module loading
+
+* Takeaways
+- It's a mobile world. Test on real devices on mobile networks
+- Optimize network utilization: SW, preload, and H2 Push
+- JS parse has a cost: ship as little JS as possible
