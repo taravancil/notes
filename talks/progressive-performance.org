@@ -1,0 +1,18 @@
+#+TITLE: Progressive Performance
+#+AUTHOR: Alex Russell
+#+YEAR: 2016
+#+URL: https://www.youtube.com/watch?v=4bZvq3nodf4
+#+TAGS: web performance
+
+To keep from wasting power, modern phones use big/little architecture,
+which menas they move tasks from high power cores to low power cores
+aggressively. The way these schedulers have been tuned, they will
+schedule stuff to happen on high power cores on touch down, in
+anticipation of animation, etc. But this doesn't actually match how
+things work on mobile devices, because when we touch the screen, often
+we send off a network request and then content comes in and *that's*
+when we need the operation to be handled by the high power core.
+
+"If you are using one of today's more popular JS frameworks in the
+most naive way, you are failing by default. There is no
+sugar coating this." - Alex Russell
