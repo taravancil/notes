@@ -214,6 +214,81 @@ First of all, upgrade your hosts. Then:
 - Send less bits
 - Decrease travel distance
 - Reuse TCP connections
+** Building Blocks of UDP
+** Transport Layer Security (TLS)
+*** Encryption, Authentication, and Integrity
+TLS provides encryption, authentication, and integrity. To use TLS,
+connection peers need to agree on which ciphersuites and keys will be
+used. The TLS handshake not only handles this negotiation, but it also
+allows peers to authenticate their identity to each other.
+*** TLS Handshake
+Each step of the handshake adds latency to starting up a TLS
+connection which is tacked onto the RTT required to even establish a
+TCP connection.
+
+1. Complete the TCP three-way handshake
+2. Client sends specs in plain text, i.e., the TLS version it's
+running, list of supported ciphersuites, etc.
+3. Server picks a TLS protocol version, decides on a ciphersuite from
+the client-provided list.
+4. Client initiates the RSA or Diffie-Hellman key exchange
+5. Server processes key exchange params sent by the client, checks
+message integrity by verifying the MAC, and returns an encrypted
+`Finished` message back to the client.
+6. Client decrypts the message, verifies the MAC, and if all is well,
+application data can now be sent.
+
+So, this requires two full roundtrips to complete the handshake,
+however, this can be improved:
+
+- False Start extension that allows app data to be sent before the
+handshake is complete.
+- TLS session resumption which allows a client that's already talked
+to the server to reuse previously negotiated parameters and
+options. Not only does this remove 1 round trip from the handshake,
+but it also reduces CPU overhead because params don't need to be
+generated.
+**** RSA, Diffie-Hellman and Forward Secrecy
+***** RSA
+Historically most common in TLS deployments. Client generates
+symmetric key, encrypts it with the server's public key, and sends it
+to the server to use as the symmetric key for the session. Server
+decrypts that with its private key and the key exchange is
+done. Problem: the same pubkey/privkey pair is used to auth the server
+and encrypt the session key sent to the server. So if an attacker
+gains access to the server's private key, they can decrypt the entire
+session.
+***** Diffie-Hellman
+Allows Client and Server to negotiate shared secret without explicitly
+communicating it in the handshake. Server's private key is used to
+sign and verify the handshake, but the shared secret never leaves the
+Client or Server and cannot be intercepted by a passive attacker.
+
+Morevoer, DH allows for perfect forward secrecy -- compromise of
+long-term keys (e.g. server's private key) does not compromise past
+sesison keys or decrypt previously recorded sessions.
+*** TLS Session Resumption
+Mechanism for reusing previously negotiated parameters to establish
+TLS connection. *Eliminates a full roundtrip and reduces computational
+costs for both client and server.*
+**** Session Identifiers
+Server creates and sends a 32-byte session identifier as part of its
+`ServerHello` message. With this in place, Server and Client know to
+store and use the previously negotiated params. If the Client sends
+the session ID, the server can reject it and full negotiation will be
+required.
+
+Limitation: server needs to create and maintain a session cache for
+every client, may be tricky for a server that sees millions of unique
+connections per day.
+**** Session Tickets
+Removes requirement of server to store client session data on
+server. If client indicates it supports session tickets, the server
+can provide a `New Session Ticket` record, with all of the negotiated
+session data encrpted with a secret key known only by the server. Then
+the client stores the ticket and can include it in `ClientHello`
+message of subsequent sessions.
+
 * Performance of Wireless Networks
 * HTTP
 * Browser APIs and Protocols
