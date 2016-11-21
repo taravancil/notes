@@ -154,7 +154,7 @@ available bandwidth on their network path.
 Time to reach cwnd size of size N:
 
 Time = RTT x [log<sub>2</sub>(N / inital cwnd)]
-***** Decreasing the Congestion Window
+***** Increasing the Congestion Window
 Decrease roundtrip time C <-> S (move geographically closer), also
 ensure taht the initial congestion window is set to teh RFC 6928 value
 of 10 segments.
