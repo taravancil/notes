@@ -1,0 +1,77 @@
+#+TITLE: How I Learned to Stop Worrying and Love urandom
+#+AUTHOR: Filippo Valsorda
+#+YEAR: 2015
+#+TAGS: cryptography entropy urandom
+#+URL: https://www.youtube.com/watch?v=OSfmtRc4VsE
+
+* What makes a source of random bytes good?
+** Unlimited
+Can generate unlimited number of random bytes
+** Uniformity
+You want to have the same likelihood of any one byte being at any one
+position in the stream of bytes.
+** Unpredictable
+This is where task becomes difficult because computers are
+deterministic machines.
+*** So where can a computer find entropy?
+Meatspace. Mouse movements, keyboard, etc. are messy and
+unpredictable.
+
+These events are:
+- visible to the kernel
+- carrying variable amounts of entropy
+- not uniform and often not sufficient
+
+* CSPRNG
+Uses random events to generate random bytes
+**** Example CSPRNG built with hash functions
+Start with an array of bytes initialized to zeroes. When an event
+happens, we serialize it, concatenate it with the pool, and hash the
+concatenation which will be the new pool. Repeat.
+
+The end result = entropy pool. To generate the entropy pool, an
+attacker would need access to all of the events that were used to
+generate the pool.
+
+Now to actually generate the random bytes, hash the entropy pool with
+a counter for each byte:
+
+SHA-512(pool || 0) -> rand[0]
+SHA-512(pool || 1) -> rand[1]
+...etc
+
+** /dev/urandom
+A CSPRNG in the kernel. It's not only about convenience, but it's
+about security. If you implement a CSPRNG in an application, you have
+to worry about getting the entropy pool from the kernel to the
+application.
+
+** /dev/urandom vs /dev/urandom
+Same code, same entropy sources. The only difference is that
+/dev/random:
+
+- tries to guess how many bits of entropy were mixed in the pool
+- decreases that number when bytes are read
+- blocks if the number is low
+
+It keeps a rating of "how random" the entropy sources are, and
+moreover, decreases this rating on each iteration of hashing a
+serialized entropy event and mixing it into the pool.
+
+Filippo's claim: this is useless because:
+
+- entropy does not decrease
+- entropy does not run out
+
+*** Summary
+- You don't need to keep measuring entropy pool
+- You don't need to refill the pool (like haveged)
+- Random numbers' "quality" does not decrease
+
+*** The early boot problem
+At early boot, /dev/urandom might not be seeded yet. The solution is
+that /dev/urandom until the pool is seeded.
+
+* Summary
+- use /dev/urandom
+- don't use userspace CSPRNGs
