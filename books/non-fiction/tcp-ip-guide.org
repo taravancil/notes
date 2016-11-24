@@ -81,4 +81,42 @@ circuit. Doesn't work in LANs, which use a single shared medium and
 baseband signaling and two devices that establish a connection would
 lock out other devices. Makes more sense in that case to packetize
 data and send intermittently.
+*** Connection-Oriented and Connectionless Protocols
+**** Connection-Oriented Protocols
+Require a logical connection be established between two devices before
+transferring data. Usually by a request-response protocol.
+**** Connectionless Protocols
+No connection required, when a device wants to send data to another
+device, it just does.
+**** Connection-Oriented and Circuits
+Of course, to establish a circuit is to establish connections. So
+circuit-switched and connection-oriented are often used
+interchangeably. Though protocols like TCP/IP and FTP are
+connection-based, but do not operate with circuits.
+**** Connection-Oriented and Connectionless Protocols in TCP/IP
+Two main protocols that operate at transport layer: TCP
+(connection-oriented) and UDP (connectionless).
+*** Messages: Packets, Frames, Datagrams, and Cells
+Common names for messages:
+
+- packet :: a message sent by protocols operating at the network
+  layer, though sometimes used to reference any type of message
+- datagram :: basically synoymous with "packet", often used to
+  reference a message sent at higher layer more often than "packet"
+- frame :: message that travels at low levels (often in the data link
+  or physical layers)
+- cell :: frames and packets can be variable-length, whereas a cell is
+  most often a message of fixed size
+- protocol data unit (PDU) and service data unit (SDU) :: formal terms
+  used to describe protocol messages sent between protocols at layer N.
+*** Message Formatting: Headers, Payloads, and Footers
+**** Fundamental Message Elements
+- Header: information placed before message data, provides control
+  information
+- Data: message data, aka payload.
+- Footer: placed after data, like header, contains control fields
+
+So what's the point of having a header and footer? Some control fields
+are calculated using data itself. In some cases it's more performant
+to perform this calculation as the payload is being sent.
 * Questions
