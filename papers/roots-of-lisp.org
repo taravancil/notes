@@ -1,0 +1,127 @@
+#+TITLE: Roots of Lisp
+#+AUTHOR: Paul Graham
+#+YEAR: 2002
+#+URL: http://lib.store.yahoo.net/lib/paulgraham/jmc.ps
+
+1960: John McCarthy published paper which did for computing what
+Euclid did for geometry (Recursive Functions of Symbolic Expressions
+and Their Computation by Machine). Demonstrated that with a few
+operators and a notation for functions, one can build a whole
+programming language. Called it "Lisp" which stands for "List
+Processing" because one of his important ideas was to use a list for
+both code and data.
+
+PG claims there exist 2 categories of programming languages: C model
+and Lisp model, and languages have been using the C model, but adding
+in pieces of Lisp (garbage collection, runtime typing).
+
+* 1. Seven Primitive Operators
+** Expressions
+An expression is either an *atom* (sequence of letters) or a *list* of
+zero or more expressions, separated by whitespace and enclosed by
+parentheses.
+
+Expressions:
+
+- foo
+- ()
+- (foo)
+- (foo bar)
+- (a b (c) d) >> list of four expressions, where (c) is a list of one expression
+
+Arithmetic: 1 + 1 has the value 2. Lisp expressions have values
+too. If an expression *e* yields a value *v* we say *e returns v*.
+*** Defining What Values Expressions Can Return
+**** List Expression
+The first element is the *operator* and remaining are *arguments*.
+***** Seven Primitive Operators
+1. (quote x) returns x (quote x) abbreviated with 'x.
+By quoting a list, we can prevent evaluation, much like in the English
+language, i.e., Cambridge is a town, and "Cambridge" is a word that contains
+nine letters.
+2. (atom x) returns the atom t if the value of x is an atom or the
+empty list. Otherwise return ().
+In Lisp, the atom t represents truth and () falsity
+
+Examples:
+
+> (atom 'a)
+t
+> (atom '(a b c))
+()
+> (atom '())
+t
+
+So now we can see why quote is useful. We can use it to protect a list
+from evaluation.
+
+Here an unquoted list is an argument to an operator is treated like
+code:
+
+> (atom (atom 'a))
+t
+
+But quoted list is treated as just list, here with two elements
+
+> (atom quote(atom quote a))
+()
+
+quote is super important operator, since code and data are both represented
+with lists in Lisp, so we need a way to distinguish them.
+3. (eq x y) returns t if values of x and y are the same atom or both
+the empty list, () otherwise
+4. (car x) expects value of x to be a list and returns the first element
+5. (cdr x) expects value of x to be a list and returns everything
+after the first element
+6. (cons x y) expects value of y to be a list, and returns a list
+containing the value of x followed by the elements of value y
+> (cons 'a '(b c))
+(a b c)
+
+> (car (cons 'a '(b c)))
+a
+7. (cond (p1 e1) ... (pn en)) p expressions are evaluated in order
+until one returns t, when one is found, the value of the corresponding
+e expression is returned as the value of the whole cond expression
+
+> (cond ((eq quote a quote b) quote first)
+        ((atom quote a) quote second))
+second
+** Denoting Functions
+(lambda (p1 ... pn) e ) where p1 ... pn are atoms (parameters) and e is
+an expression. An expression whose first element is such an expression
+((lambda (p1 ... pn) e) a1 ... an) is called a function call and its
+value is computed like so:
+
+1. Each expression ai is evaluated. Then e is evaluated. During
+evaluation of e, the value of any occurrence of one of the pi is the
+value of the corresponding ai.
+
+> ((lambda (x) (cons x '(b))) 'a)
+(a b)
+> ((lambda (x y) (cons x (cdr y)))
+   'z
+   '(a b c))
+(z b c)
+
+If an expression has as its first element an atom f that is not one of the
+primitive operatiors (f a1...an) and the value of f is a function (lambda
+(p1...pn) e) then the value of the expression is the value of
+
+((lambda (p1...pn) e) a1...an)
+
+^Parameters can be used as operators in expressions as well as in arguments
+
+> ((lambda (f) (f '(b c)))
+   '(lambda (x) (cons 'a x)))
+(a b c)
+
+*** Recursive Functions
+(label f (lambda (p1...pn) e)) behaves like (lambda (p1...pn) e), but any
+occurrence of f within e will evaluate to the label expression
+**** Example
+Let's define a function (subst x y z) which takes an expression x, an atom y,
+and a list z, and returns a list like z but with each instance of y, at any
+depth of nesting in z replaced by x
+> (subst 'm 'b '(a b (a b c) d))
+(a m (a m ch d)
