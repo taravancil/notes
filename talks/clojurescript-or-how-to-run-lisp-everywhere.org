@@ -1,0 +1,65 @@
+#+TITLE: ClojureScript, or How to run Lisp Everywhere
+#+AUTHOR: David Nolen
+#+YEAR: 2015
+#+TAGS: clojure clojurescript lisp
+
+* We're compiling a lot of things to JavaScript right now
+- CoffeeScript
+- TypeScript
+- asm.js
+- Dart
+- and JavaScript itself (ES2015)
+
+^ But these languages maintain the status quo, whereas ClojureScript
+introduces radical changes.
+
+* A Brief History of Lisp
+Created by John McCarthy (and thus garbage collection and functional
+programming)
+
+* ClojureScript
+** Understanding the Data Structures that ClojureScript Implements
+*** Functional Programming and Data
+- immutable values, not mutable objects
+- a "change" returns a new value, leaving the old one unmodified
+- they're persistent (not persistent on disk, persistent in that it's
+  immutable)
+- they're fast
+*** Linked Lists
+You can cons the head onto the list. That doesn't destroy the original list,
+it preserves the original and creates a new one. But because linked lists run
+are composed of pointers, the *memory is shared* between different linked
+lists. (structural sharing)
+
+^ This is how git works
+
+This is both space efficient and computationally efficient, because it
+requires less copying on writes.
+*** Bitmapped Vector Trie (aka Persistent Vector)
+- data lives in the leaves
+- prefix tree used for string lookup
+- bitwise trie
+
+A persistent vector is an array of arrays. Has same properties you'd expect
+from a mutable array: efficient lookup, can efficiently add elements to the
+end of the array.
+**** Lookups
+Use bitmasking, super optimized in most modern runtime environments
+**** Updating
+You only need to update the arrays on the path to the elemement that needs to
+be updated. So even if it's a very large data set, most of the arrays won't
+be updated.
+** So Why Is Clojure Important?
+We can do lock-free concurrent programming because these data structures aren't
+mutable!
+*** But What Value Does this Provide on the Front End?
+React computes a virtual DOM based on the data. If the data changes, it
+computes a new virtual DOM then diffs with the previous one. Sounds slow, but
+React uses a bunch of tricks to optimize, and it's of course faster than
+working directly with the DOM, which is sooo slow.
+
+See goya demo on GitHub (very cool!)
+** Companies Using ClojureScript
+- Prismatic
+- Circle CI (talk to Paul Biggar at RC!)
+
