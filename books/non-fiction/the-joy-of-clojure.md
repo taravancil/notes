@@ -146,3 +146,229 @@ patching*.
 
 `defn` macro provides namespace private functions.
 
+## 2. Drinking from the Clojure Firehose
+
+### 2.1 Scalars
+
+#### 2.1.1 Numbers
+
+Can consist of:
+
+* digits 0-9
+* a decimal point
+* a sign (+/-)
+* *e* to represent exponential notation
+* *M* which flags arbitrary precision
+
+#### 2.1.2 Integers
+
+Can take an infinitely large vaule, limited by memory ofc.
+
+```clojure
+42
++9
+-107
+```
+
+```clojure
+; 127 represented with decimal, hexadecimal, octal, radix-32, and binary
+literals
+[127 0x7F 0177 32r3V 2r01111111]
+```
+
+#### 2.1.3 Floating-point Numbers
+
+Like integers, are arbitrarily precise. Can be represented in traditional form
+(`1.3`) or with exponential form (`1.3e3`).
+
+#### 2.1.4 Rationals
+
+Represented by an integer numerator and denominator. Are more compact and
+precise representation of a given value over floating-point.
+
+`25/5` is resolved to the integer 5.
+
+```
+22/7
+7/22
+-103/4
+```
+
+#### 2.1.5 Symbols
+
+Often used to represent another value. When a symbol is evaluated, you get
+whatever that symbol refers to in the current context.
+
+#### 2.1.6 Keywords
+
+Similar to symbols, except they always evaluate to themselves. Used more often
+than symbols in Clojure.
+
+```clojure
+:a
+:2
+:KeywordName
+```
+
+The `:` is part of the literal syntax, not part of the keyword name.
+
+#### 2.1.7 Strings
+
+Pretty much the same as other PLs.
+
+#### 2.1.8 Characters
+
+Prefixed with a backslash and stored as Java Character objects
+
+```clojure
+\a      ; lowercase a
+\u0042  ; unicode character uppercase B
+\\      ; backslash character
+```
+
+### 2.2 Collections
+
+#### 2.2.1 Lists
+
+Written with parentheses like in other Lisps:
+
+```clojure
+(yankee hotel foxtrot)
+```
+
+Like in other lists, a list will be evaluated if not `quote`d.
+
+`()` != `nil`
+
+#### 2.2.2 Vectors
+
+Similar to lists, but unlike lists, no function or macro call is performed on
+the elements. Instead each item is evaluated in order.
+
+Vector types are heterogeneous. `[]` != `nil`.
+
+#### 2.2.3 Maps
+
+```clojure
+{1 "one", 2 "two", 3 "three"}
+```
+
+Commas are optional, just represent whitespace. Like vectors, every item in the
+map is evaluated before the result is stored in the map. Unlike vectors, he
+order in which they're evaluated isn't guaranteed. Can have items of any type
+for both keys and values. `{}` != `nil`.
+
+#### 2.2.4 Sets
+
+```clojure
+#{1 2 "three" :four 0x5}
+```
+
+`#{}` != `nil`
+
+### 2.3 Functions
+
+Clojure has first-class functions, which means they can be used as any value,
+i.e. stored in variables, held in collections, passed as arugments,
+returned as the result of a function.
+
+#### 2.3.1 Calling Functions
+
+Uses **prefix notation**:
+
+```clojure
+(+ 1 2 3)
+;=> 6
+```
+
+The advantage of prefix over infix notation is that it allows any number of
+operands per operator. Also makes no distinction btwn operator notation and
+regular function calls, which provides incredible flexibility.
+
+#### 2.3.2 Defining Functions
+
+**special form** - an expression that's part of the core language, but not
+created in terms of functions, types or macros
+
+An anonymous function can be defined as a special form:
+
+```clojure
+(fn mk-set [x y] #{x y})
+```
+
+^ `mk-set` symbol is optional and is not a globally accessible name for the
+function, rather an internal name that the function can use to reference itself.
+
+**arity** - differences in argument count that a function will accept
+
+We can change `mk-set` to take either one or two arguments:
+
+```clojure
+(fn
+  ([x]  #{x})
+  ([x y} #{x y}]))
+```
+
+Taking a variable number of arguments:
+
+```clojure
+((fn arity [x y & z] [x y z]) 1 2)
+;=> [1 2 nil]
+((fn arity [x y & z] [x y z]) 1 2 3 4)
+;=> [1 2 (3 4)]
+((fn arity [x y & z] [x y z]) 1)
+;=> wrong number of args error
+```
+
+#### 2.3.3 Simplifying Functions with `def` and `defn`
+
+`def` assigns a symbolic name to a piece of Clojure data. Since functions are
+data (first-class objects) in Clojure, we can assign them to a name:
+
+```clojure
+(def make-set
+  (fn
+    ([x] #{x})
+    ([x y] #{x y})))
+
+(make-set 1 2)
+;=> #{1 2}
+```
+`defn` is a macro and is a much less cumbersome way to define functions than `def`.
+
+```clojure
+(defn make-set
+  "This is a docstring"
+  ([x]    #{x})
+  ([x y]  #{x y}))
+
+(make-set 1 2)
+;=> #{1 2})
+```
+
+#### 2.3.4 In-place Functions with `#()`
+
+**reader feature** - analogous to preprocessor directives in that they signify
+that some given form should be replaced with another at read time.
+
+Shorthand notation for creating an anonymous function using the `#()` reader
+feature. `#()` is replaced with the special form `fn` and they can be used
+interchangably.
+
+`#()` can accept arguments that are implicitly declared through the use of
+special symbols prefixed with %:
+
+```clojure
+(def make-list_ #(list %))
+(def make-list1 #(list %1))
+(def make-list2 #(list %1 %2))
+(def make-list3 #(list %1 %2 %3))
+(def make-list3+ #(list %1 %2 %3 %&))
+
+(make-list_ 1)
+;=> (1)
+
+(make-list-3+ 1 2 3 4 5)
+;=> (1 2 3 (4 5))
+```
+
