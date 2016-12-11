@@ -86,10 +86,63 @@ weaknesses of OO in facilitating it.
 
 #### 1.4.1 Defining Terms
 
-*time* - the relative moments when events occur
-*identity* - the properties associated with an entity
-*state* - a snapshot of an entity's properties
+**time** - the relative moments when events occur
+**identity** - the properties associated with an entity
+**state** - a snapshot of an entity's properties
 
-In OO, there's no distinction between state and identity.
+In OO, there's no distinction between state and identity (mutable state...which
+is an oxymoron).
 
+#### 1.4.2 Imperative Baked In
+
+**imperative programming** - a sequence of statements mutates program state.
+
+Most common model for IP is OO, but by allowing unrestrained mutation via
+variabes, the imperative model doesn't directly support concurrency.
+
+#### 1.4.3 Much of What OOP Offers, Clojure Provides
+
+##### Polymorpism and the Expression Problem
+
+**polymorphism** - the ability of a function or method to have different
+definitions depending on the type of the target object
+
+Clojure provides polymorphism via both multimethods and protocols
+
+```clojure
+(defprotocol Concatenable
+  (cat [this other]))
+
+(extend-type String
+  Concatenatable
+  (cat [this other]
+    (.concat this other)))
+
+(cat "House" " of Leaves")
+;=> "House of Leaves"
+```
+
+This defines a protocol `Concatenable` that groups functions that define the set
+of functions provided (in this case `cat`). We then extend the protocol to the
+`String` class and define the implementation. We can also extend this to another
+type:
+
+```clojure
+(extend-type java.util.List
+  Concatenable
+  (cat [this other]
+    (concat this other)))
+
+(cat [1 2 3] [4 5 6])
+;=> (1 2 3 4 5 6)
+```
+
+**The Expression Problem** - Implementing an existing set of abstract methods for
+an existing concrete class requires having to change the code for either. Some
+dynamic languages provide a partial solution to the problem via *monkey
+patching*.
+
+##### Encapsulation
+
+`defn` macro provides namespace private functions.
 
