@@ -714,3 +714,52 @@ TODO
 
 TODO
 
+## 3. Dipping Our Toes in the Pool
+
+### 3.1 Truthiness
+
+#### 3.1.1 Truthiness in Clojure
+
+Everything except `false` and `nil` are `true` in Clojure. Clojure opts for this
+because branches in a program's logic are already ripe for complexity and bugs.
+
+#### 3.1.2 Don't Create Boolean Objects
+
+```clojure
+(def evil-false (Boolean. "false"))
+```
+
+^ Creates new instance of Boolean, which is totally unnecessary.
+
+#### 3.1.3 `nil` vs. `false`
+
+It's rare that this is necessary, but you can do it with `nil?` and `false?`
+
+### 3.2 Nil Pun with Care
+
+Since empty collections evaluate to `true`, we need to be able to tell if we're
+working with an empty collection.
+
+```clojure
+(seq [1 2 3])
+;=> (1 2 3)
+
+(seq [])
+;=> nil
+```
+
+In Common Lisp, an empty list acts as a `false` value and can be used as a
+*pun* in terminating loop. In Clojure `seq` is used as a terminating condition:
+
+```clojure
+(defn print-seq [s]
+  (when (seq s)
+    (prn (first s))
+    (recur (rest s))))
+
+(print-eq [1 2])
+; 1
+; 2
+;=> nil
+```
+
