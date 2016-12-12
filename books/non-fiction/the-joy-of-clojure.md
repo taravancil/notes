@@ -842,3 +842,88 @@ Each function paramater can destructure a map or sequence:
 ;=> nil
 ```
 
+### 3.4 Using the REPL to Experiment
+
+This is a *very good* section and worth revisiting. -tbv
+
+#### 3.4.1 Experimenting with `seqs`
+
+Color every pixel of a canvas with the xor of its x and y coords.
+
+Let's get the coordinates:
+
+```clojure
+(for [x (range 2)] y (range 2)] [x y])
+;=> ([0 0] [0 1] [1 0] [1 1])
+```
+
+**Clojure provides `find-doc` for searches functions and doc strings**
+
+```clojure
+(defn xors [max-x maxy-y]
+  (for [x (range max-x) y (range max-y)]
+    [x y (bit-xor x y)]))
+```
+
+#### 3.4.2 Experimenting with Graphics
+
+```clojure
+(def frame (java.awt.Frame.))
+```
+
+We have a frame, but it's hidden. Let's find out what methods are available to
+make it visible:
+
+```clojure
+(for [method (seq (.getMethods java.awt.Frame))
+        :let [method-name (.getName method)]
+        :when (re-find #"Vis" method-name)]
+  method-name)
+;=> ("setVisible" "isVisible")
+```
+
+Let's set the frame to visible:
+
+```clojure
+(.setVisible frame true)
+
+; then udate its size
+(.setSize frame (java.awt.Dimension. 200 200))
+;=> nil
+
+;get the graphics context
+(def gfx (.getGraphics frame))
+
+; draw a rectangle
+(.fillRect gfx 100 100 50 75)
+
+; colorize
+(.setColor gfx (java.awt.Color. 255 128 0))
+(.fillRect gfx 100 150 75 50)
+```
+
+Now let's combine the `xors` macro we wrote earlier to use it to draw colors:
+
+```clojure
+(doseq [[x y xor] (xors 200 200)]
+  (.setColor gfx (java.awt.Color. xor xor xor))
+  (.fillRect gfx x y 1 1))
+```
+
+Ok, now try the same `doseq` but with (500 500) as the args ffor `xors`. You get
+an error about the Color parameter being outside of the expected range. When an
+error is thrown, the result is stored in a Var named `*e`.
+
+```clojure
+(.printStackTrace *e)
+; ...
+```
+
+Update to keep values under 256
+
+```clojure
+(defn xors [xs ys]
+  (for [x (range xs) y (range ys)]
+    [x y (rem (bit-xor x y) 256)]))
+```
+
