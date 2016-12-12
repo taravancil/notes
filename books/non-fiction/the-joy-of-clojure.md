@@ -372,3 +372,135 @@ special symbols prefixed with %:
 ;=> (1 2 3 (4 5))
 ```
 
+### 2.4 Vars
+
+Named by a symbol and holds a single value. Its value can be changed while
+program is running. Can be shadowed by a thread local value, but doesn't change
+original value or root binding.
+
+#### 2.4.1 Declaring Bindings using `def`
+
+**root binding** - a binding thats' the same across all threads, unless
+otherwise rebond relative to specific threads
+
+This binds the value 42 to the symbol `x`:
+
+```clojure
+(def x 42)
+```
+
+Vars don't require a value. We can declare them then leave binding to individual
+threads.
+
+### 2.5 Locals, Loops, and Blocks
+
+#### 2.5.1 Blocks
+
+`do` is for treating a series of expressions as one. All expressions evaluated,
+last returned:
+
+```clojure
+(do
+  6
+  (+ 5 4)
+  3)
+;=> 3
+```
+
+#### 2.5.2 Locals
+
+Scope is defined using a `let` form, which starts with a vector that defines the
+bindings.
+
+```clojure
+(let [r 5
+      pi 3.1415
+      r-squared (* r r)]
+  (println "radius is" r)
+  (* pi r-squared))
+```
+
+The body of the let is "implicit-do" because it behaves the same way: all
+expressions will be evaluated, but only the last one is returned.
+
+#### 2.5.3 Loops
+
+Done with recursive calls.
+
+**tail recursion** - TODO
+
+##### Recur
+
+```clojure
+(defn print-down-from [x]
+  (when (pos? x)
+    (println x)
+    (recur (dec x))))
+
+(print-down-from 3)
+;=> 3\n2\n1
+```
+
+This is similar to how looping is done in imperative PLs, except `recur` does
+two things:
+
+1. Rebinds `x` to the new value
+2. returns control to the top of print-down-from
+
+If the function has multiple arguments, `recur` call must as well. Just like
+with a function call, the expressions in the `recur` call are evaluated in order
+first adn only bound to the function args simultaneously.
+
+A recursive accumulator:
+
+```clojure
+(defn sum-downn-from [sum x]
+  (if (pos? x)
+    (recur (+ sum x) (dec x))
+    sum))
+```
+
+Notice that these two loops used different conditional blocks. Typically, use
+`when` when:
+
+* No else-part is associated with the result of the conditional
+* You require an implicit `do` in order to perform side effects
+
+##### Loop
+
+Sometimes you want to loop to a point inside a function, not to the top. `loop`
+acts like let, except it provides a target for `recur` to jump to:
+
+```clojure
+(defn sum-down-from [initial-x]
+  (loop [sum 0, x initial-x]
+    (if (pos? x)
+      (recur (+ sum x) (dec x))
+      sum)))
+```
+
+The locals `sum` and `x` are initialized, just like they would be with `let`.
+The `recur` always loops back to the closest `loop` or `fn`, so here it goes to
+`loop`. The loop locals are rebound to the values given in `recur`.
+
+##### Tail Position
+
+**tail position** - a form is in he tail position of an expression when its
+value may be the return value of the whole expression.
+
+`recur` can only be used in the tail position of a function or `loop`.
+
+Here the `if` form is in the tail position, because whatever is returned the
+whole function will return. The x in the `then` clause is also in tail position, but
+the x in the `else` clause is not, because when evauluated it goes to the `-` function, it does not return directly. But the whole `else` clause is in the tail position.
+
+```clojure
+(defn absolute-value [x]
+  (if (pos? x)
+    x
+    (- x)))
+```
+
+### 2.6 Quoting
+
+
