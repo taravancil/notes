@@ -572,3 +572,145 @@ syntax-quote:
 ^ The `@` tells Clojure to unpack the sequence `x`, splicing it into the
 resulting list rather than inserting it as a nested list.
 
+#### 2.6.5 Auto-gensym
+
+Generates a new unqualified symbol:
+
+```clojure
+`potion#
+;=> potion__211__auto__
+```
+
+### 2.7 Leveraging
+
+Leveraging Java via Interop
+
+Clojure is symbiotic with its host, the JVM.
+
+#### 2.7.1 Accessing Static Class Members
+
+```clojure
+java.util.Locale/JAPAN
+;=> #<Locale> ja_JP>
+```
+
+#### 2.7.2 Creating Java Class Instances
+
+```clojure
+(new java.util.HashMap {"foo" 42 "bar" 9 "baz" "quux"})
+;=> #<HashMap> {baz=quux, foo=42, bar=9}>
+; This is idiomatic:
+(java.util.HashMap. {"foo" 42 "bar" 9})
+```
+
+#### 2.7.3 Accessing Java Instance Members with the . Operator
+
+Access a property:
+
+```clojure
+(.x (java.awt.Point. 10 20))
+;=> 10
+```
+
+Access a method:
+
+```clojure
+(.divide (java.math.BigDecimal. "42") 2M)
+;=> 21M
+```
+
+#### 2.7.4 Setting Java Instance Properties
+
+Java instance properties can be set with `set!` function:
+
+```clojure
+(let [origin (java.awt.Point. 0 0)]
+  (set! (.x origin) 15)
+  (str (origin))
+;=> "java.awt.Point[x=15,y=0]"
+```
+
+#### 2.7.5 The .. Macro
+
+To mimic how chaining method calls works in Java, we can use Clojure's . special
+form:
+
+```clojure
+(.endsWith (.toString) (java.util.Date.)) "2016")
+;=> true
+```
+
+But this is difficult to read, so Clojure has .. macro:
+
+```clojure
+(.. (java.util.Date.) toString (endsWith "2016"))
+;=> true
+```
+
+#### 2.7.6
+
+The `doto` Macro
+
+Sometimes need to do a bunch of mutations on a fresh instance:
+
+```clojure
+(doto (java.util.HashMap.)
+  (.put "HOME" "/home/me")
+  (.put "SRC" "src"))
+```
+
+### 2.8 Exceptional Circumstances
+
+#### 2.8.1 A Little Pitch and Catch
+
+```clojure
+(throw (Exception. "I done throwed"))
+```
+
+Catching exceptions:
+
+```clojure
+(defn throw-catch [f]
+  [(try
+    (f)
+    (catch ArithmeticException e "No dividing by zero!")
+    (catch Exception e (str "You are so bad " (.getMessage e)))
+    (finally (println "Returning... ")))])
+(throw-catch #(/ 10 5))
+;=> [2]
+(throw-catch / 10 0)
+;=> ["No dividing by zero"]
+```
+
+### 2.9 Namespaces
+
+#### 2.9.1 Creating Namespaces using `ns`
+
+Straightforward:
+
+```clojure
+(ns tara)
+```
+
+#### 2.9.2 Loading Namespaces with `:require` Directive
+
+```clojure
+(ns joy.req
+  (:require [clojure.set :as s]))
+
+(s/intersection #{1 2 3} #{3 4 5})
+;=> #{3}
+```
+
+#### 2.9.3 Loading and Creating Mappings with `:use`
+
+TODO
+
+#### 2.9.4 Creating Mappings with `:refer`
+
+TODO
+
+#### 2.9.5 Loading Java Classes with `:import`
+
+TODO
+
