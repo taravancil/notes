@@ -501,6 +501,74 @@ the x in the `else` clause is not, because when evauluated it goes to the `-` fu
     (- x)))
 ```
 
-### 2.6 Quoting
+### 2.6 Preventing Things from Happening: Quoting
 
+#### 2.6.1 Evaluation
+
+When collection evaluated, each expression in the collection is evaluated first.
+So when you do `(cons 1 [2 3])`, the whole form is evaluated.
+
+Scalar values evaluate to themselves. Vectors evaluate by first evaluating each
+item. Because they're literal scalars, that's all well good. But lists are
+different, they call functions.
+
+#### 2.6.2 Quoting
+
+`quote` special form prevents its arguments from being evaluated:
+
+```clojure
+(def tena 9)
+(quote tena)
+;=> tena
+```
+
+^ Instead of evalutating to the value of `tena`, it evaluates to the symbol
+`tena`. This works for vectors, maps, lists, function calls, and special forms.
+
+Like other Lisps, Clojure provides a shorthand for `quote` in the form `'`, but
+it's not as commonly used in Clojure in other Lisps.
+
+*Notice that `()` already evaluates to itself. `quote`ing an empty list is not
+idiomatic.*
+
+##### Syntax-Quote
+
+Like `quote`, prevents its argument and subforms from being evaluated. Written
+with a single back-quote.
+
+**qualified symbols** - begin with a namespace and a forward slash
+(`clojure.core/map`)
+
+Syntax-quote automatically qualifies all unqualified symbols:
+
+```clojure
+`map
+;=> clojure.core/map
+`Integer
+;=> java.lang.Integer
+```
+
+#### 2.6.3 Unquote
+
+Allows you to mark that some forms require evaluation within the body of
+syntax-quote:
+
+```clojure
+`(+ 10 (* 3 2))
+;=> (+ 10 (* 3 2))
+`(+ 10 ~(* 3 2))
+;=> (clojure.core/+ 10 6)
+```
+
+#### 2.6.4 Unquote-Splicing
+
+```clojure
+(let [x '(2 3)] `(1 ~x))
+;=> (1 (2 3))
+(let [x '(2 3)] `(1 ~@x))
+;=> (1 2 3)
+```
+
+^ The `@` tells Clojure to unpack the sequence `x`, splicing it into the
+resulting list rather than inserting it as a nested list.
 
