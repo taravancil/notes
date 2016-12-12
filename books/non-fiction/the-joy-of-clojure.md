@@ -763,3 +763,82 @@ In Common Lisp, an empty list acts as a `false` value and can be used as a
 ;=> nil
 ```
 
+### 3.3 Destructuring
+
+#### 3.3.1 Your Assignment, Should You Choose to Accept It
+
+Let's write a Rolodex. Take a vector of length 3 that represents a person's
+first, middle, and last names and return a string that will sort in the normal
+way, like "Steele, Guy Lewis".
+
+The annoying way:
+
+```
+(def guys-whole-name ["Guy" "Lewis" "Steele"])
+
+(str (nth guys-whole-name 2) ", "
+     (nth guys-whole-name 0) " "
+     (nth guys-whole-name 1)))
+;=> "Steele, Guy Lewis"
+```
+
+#### 3.3.2 Destructuring with a Vector
+
+```clojure
+(let [[f-name m-name l-name] guys-whole-name]
+  (str l-name ", " f-name " " m-name))
+```
+
+We can also use `&` to collect the rest of the values into a sequence.
+
+```clojure
+(let [[a b c  more] (range 10)]
+  (prn "a b c are: " a b c)
+  (prn "more is: " more))
+
+;=> a b c are: 0 1 2
+;=> more is: (3 4 5 6 7 8 9)
+;=> nil
+```
+
+Finally, the `:as` directive is used to bind the value of the whole vector to a
+symbol.
+
+```clojure
+(let [range-vec (vec (range 10))
+      [a b c & more :as all] range-vec]
+  (println "all is: " all))
+;=> all is: [0 1 2 3 4 5 6 7 8 9]
+```
+
+#### 3.3.3 Destructuring with a Map
+
+Maybe three part vector wasn't the appropriate data structure. Let's try a map:
+
+```clojure
+(def guys-name-map
+  {:f-name "Guy" :m-name "Lewis" :l-name "Steele"})
+
+(let [{f-name :f-name m-name :m-name l-name :l-name} guy-name-map]
+  (str l-name ", " f-name " " m-name))
+```
+
+Rewritten with `:keys`:
+
+```clojure
+(let [{:keys [f-name m-name l-name]} guys-name-map]
+  (str l-name ", " f-name " " m-name))
+```
+#### 3.3.4 Destructuring in Function Parameters
+
+Each function paramater can destructure a map or sequence:
+
+```clojure
+(defn print-last-name [{:keys [l-name]}]
+  (println l-name))
+
+(print-last-name guys-name-map)
+; Steele
+;=> nil
+```
+
