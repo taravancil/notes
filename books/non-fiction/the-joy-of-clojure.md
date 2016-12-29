@@ -927,3 +927,166 @@ Update to keep values under 256
     [x y (rem (bit-xor x y) 256)]))
 ```
 
+## 4. On Scalars
+
+* Understanding precision
+* Trying to be rational
+* When to use keywords
+* Symbolic resolution
+* Regular expressions
+
+### 4.1 Understanding Precision
+
+Numbers are as precise as they need to be. You *could* store the value of Pi up
+to a billion places, but that's totally not necessary.
+
+#### 4.1.1 Truncation
+
+**truncation** - limiting of accuracy for a floating-point number based on a
+deficiency in the corresponding representation
+
+```clojure
+(let [imadeuapi 3.1415926535897932838928341222222222222222222222M]
+  (prn (class imadeuapi))
+  imadeuapi)
+; java.math.BigDecimal
+;=> 3.14...M
+
+(let [butieatedit 3.14.......]
+  (prn (class butieatedit))
+  butieatedit)
+; java.lang.Double
+;=> 3.141592653589793
+```
+
+`java.lang.Double` is insufficient to represent the precision we demanded, but
+the literal notation with suffix `M` indicates that we require arbitrary decimal
+representation.
+
+### 4.3 When to Use Keywords
+
+#### 4.3.1 Keywords vs. Symbols
+
+Keywords always refer to themselves, i.e. `:magma` always has value `:magma`
+whereas `ruins` can refer to to any value or reference.
+
+##### As Keys
+
+Keywords are self-evaluating and provide fast equality checks, so almost always
+used as map keys. Can also be used as functions, taking a map as argument to
+perform value lookups:
+
+```clojure
+(def population {:zombies 2700 :humans 9})
+
+(:zombies population)
+;=> 2700
+
+(print ln (/ (:zombies population)
+             (:humans population))
+          "zombies per capita")
+; 300 zombies per capita
+
+##### As Enumerations
+
+i.e. `:small`, `:medium`, `:large`
+
+##### As Directives
+
+That is, if a function has a specific mode it can run in, you can use a keyword
+to indicate that the mode should be used.
+
+```clojure
+(defn pour [lb ub]
+  (cond
+    (= ub :toujours) (iterate inc lb)
+    :else (range lb ub)))
+
+(pour 1 10)
+;=> (1 2 3 4 5 6 7 8 9)
+
+(pour 1 :toujours)
+; ... infinite
+```
+
+*Fun fact: `:else` is not a special keyword, rather `cond` just evaluates it as
+truthy and thus returns the expression that follows. Any keyword could replace
+`:else` in this situation.*
+
+### 4.4 Symbolic Resolution
+
+Roughly, symbols provide a name for a given value, but can also be referred to
+directly by `quote`ing the symbol:
+
+```clojure
+(identical? 'goat 'goat)
+;=> false
+
+(= 'goat 'goat)
+;=> true
+
+(name 'goat)
+("goat")
+```
+
+They're not identical because each `goat` symbol is a discrete object that just
+happens to share a name and therefore symbolic representation. `=` checks for
+symobl equality but `identical?` only returns true if symbols are the same
+object:
+
+```clojure
+(let [x 'goat y x] (identical? x y))
+;=> true
+```
+
+#### 4.4.1 Metadata
+
+`with-meta` takes an object and a map and returns another object of same type
+with metadata attached
+
+```clojure
+(let [x (with-meta 'goat {:ornery true})
+      y (with-meta 'goat {:ornery false})])
+ [(= x y)
+  (identical? x y)
+  (meta x)
+  (meta y)]
+
+;=> [true false {:ornery true} {:ornery false}]
+```
+
+#### 4.4.3 Lisp-1
+
+Clojure is a Lisp-1: uses same name resolution for function and value bindings.
+Lisp-2 PLs (Common Lisp), name resolutions are performed differently depending
+on context of the symbol.
+
+One drawback of Lisp-1s is that because the same name resolution scheme is used
+for functions and args, it's possible to shadow existing functions with locals
+or Vars. The benefit is that we can pass around functions as first-class
+objects:
+
+```clojure
+(defn best [f xs]
+  (reduce #(if (f % %2) % %2) xs))
+```
+
+### 4.5 Regular Expressions - the Second Problem
+
+Utilizes Java's regex engine
+
+#### 4.5.1 Syntax
+
+This is `#"an example pattern"` which produces a compiled regex object that can
+be used directly with Java interop method calls or with any Clojure regex.
+
+#### 4.5.2 Functions
+
+Java's regex Pattern object has many methods, but only `split` is used regularly
+to split string into array of Strings breaking the original string where the
+pattern matches:
+
+```clojure
+(seq (.split #"," "one,two,three"))
+;=> ("one" "two" "three")
+```
