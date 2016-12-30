@@ -1090,3 +1090,124 @@ pattern matches:
 (seq (.split #"," "one,two,three"))
 ;=> ("one" "two" "three")
 ```
+
+## Composite Data Types
+
+a.k.a. collections
+
+### 5.1 Persistence, Sequences, and Complexit
+
+#### 5.1.1 Persistence in the Context of Clojure
+
+In Clojure persistence doesn't mean storage a value to disk, rather it has to do
+with immutable in-memory collections.
+
+This creates a sequence, `ds`, and changes to it happen in place, which means
+historical versions are lost:
+
+```clojure
+(def ds (into-array [:willie :barnabas :adam]))
+(seq ds)
+;=> (:willie :barnabas :adam)
+
+(aset ds 1 :quentin)
+;=> :quentin
+
+(seq ds)
+;=> (:willie :quentin :adam)
+```
+But using a persistent data structure is a different story
+
+```clojure
+(def ds [:willie :barnabas :adam])
+
+(def ds1 (replace {:barnabas :quentin} ds))
+ds
+;=> [:willie :barnabas :adam]
+ds1
+;=> [:willie :quentin :adam]
+```
+
+#### 5.1.2 Sequence Terms and What They Mean
+
+##### Terms
+
+A *sequential* collection holds a series of valuse without reordering them.
+
+A *sequence* is a sequential collection that represents a series of values that
+may or may not exist yet. Can be values from a concrete collection or may be
+computed on the fly. May be empty.
+
+*seq* is a Clojure API for navigating collections, has two functions: `first`
+and `rest`.
+
+```clojure
+(first '())
+;=> nil
+(rest '())
+;=> ()
+(first '("butt"))
+;=> "butt"
+(rest '("butt"))
+;=> ()
+```
+
+There's also a function `seq` which accepts a bunch of different collection-like
+objects. Lists, for example, already implement the `seq` API, so calling `seq`
+on them returns the collection itself. If the collection is empty, `seq` returns
+`nil`.
+
+##### Equality Partitions
+
+Three categories of composite data types:
+
+1. Sequentials
+2. Maps
+3. Sets
+
+Two objects are never equal if they fall under different partitions.
+
+But if two sequentials have same values in same order, they are equal.
+
+```clojure
+(= [1 2 3] '(1 2 3))
+;=> true
+
+(= [1 2 3] #{1 2 3})
+;=> false
+```
+
+### 5.2 Vectors: Creating and Using
+
+Store zero or more values sequentially indexed by a number, sort of like arrays,
+but they're immutable and persistent. Versatile, memory-efficient, CPU-efficient
+at small and large sizes.
+
+#### 5.2.1 Building Vectors
+
+```clojure
+(vec (range 10))
+;=> [0 1 2 3 4 5 6 7 8 9]
+
+(let [my-vector [:a :b :c]]
+  (into my-vector (range 10))) ; O(n) where n is elements in second argument
+;=> [:a :b :c 0 1 2 3 4 5 6 7 8 9]
+```
+
+##### Primitive Vectors
+
+```clojure
+(into (vector-of :int) [Math/PI 2 1.3])
+;=> [3 2 1]
+
+(into (vector-of :char) [100 101 102])
+;=> [\d \e \f]
+```
+
+#### 5.2.2 Large Vectors 
+
+When they are large, vectors are more efficient than lists at:
+
+1. adding and removing things from right end of collection
+2. accessing or changing items in in the interior by numeric index
+3. walking in reverse order
