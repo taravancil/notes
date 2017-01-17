@@ -123,3 +123,95 @@ but of course that is subject to network outages.
 * Brumley, Boneh - "Remote timing attacks are practical"
 * Percival - "How to zero a buffer"
 
+## 3. Symmetric security
+
+Simplest form of crypto because all parties share the same key. Also tends to be
+the fastest form of crypto. Base level, key is sequence of bytes that is used by
+a transformation function that operates on input bits. Key distribution is more
+difficult with symmetric encryption than assymetric because it requires a secure
+channel for transmitting the key.
+
+Two components:
+
+1. Confidentiality: block or stream cipher
+2. Integrity and authenticity: the MAC algorithm
+
+Most algs don't provide both components, but those that do are called
+authenticated encryption (AE) or Authenticated Encryption with Additional Data
+(AEAD).
+
+### Indistinguishability
+
+#### IND-CPA (chosen plaintext attack)
+
+Attacker sends a pair of messages that are same length to be encrypted. Server
+encrypts one and sends back ciphertext. Attacker should not be able to determine
+which message was encrypted.
+
+#### IND-CCA (chosen ciphertext attack)
+
+Similar as above, but attacker sends two ciphertexts, server decrypts one and
+sends it back. Attacker should not be able to determine which was decrypted.
+
+This is ofter known as padding oracle attack (for example in AES-CBC mode
+without an HMAC).
+
+Another desirable property is that keys be indistinguishable from random bytes.
+
+### Authenticity and integrity
+
+If ciphertexts can be modified, that changes the decrypted content. This is not
+just problematic when considering situations like delivering a web page, but
+changing the ciphertext can also be used to verify correct padding, and recover
+private keys (i.e. padding oracle attack with AES-CBC mode).
+
+Several ways to apply a MAC. Author claims that the correct choice is to
+encrypt-then-MAC:
+
+1. Encrypt-and-MAC: apply MAC to plaintext, then send encrypted plaintext and
+   MAC. To verify MAC, receiver decrypts the message, but this still permits an
+   attacker to submit modified ciphertexts.
+2. MAC-then-encrypt: MAC is applied and appended to the plaintext, both are
+   encrypted. Receiver still must decrypt the message, and MAc can be modified
+   by modifying the resulting ciphertext. Anohter surface for CCA.
+3. Encrypt-then-MAC: encrypt the message and append a MAC of ciphertext.
+   Receiver verifies MAC and does not decrypt if invalid. Removes IND-CCA attack
+   surface and also saves processing resources in the case that ciphertext is
+   invalid.
+
+### NaCl
+
+Has both a symmetric library (secretbox) and an assymetric library (secretbox)
+by Daniel J. Bernstein. Uses 32-byte key and 24-byte nonces.
+
+Secretbox uses a stream cipher `XSalsa20` to provide confidentiality and a MAC
+`Poly1305`. Key data type is \*[32byte] and \*[24]byte for nonce.
+
+Example: generate a random key and random nonce.
+
+```go
+const (
+  KeySize   = 32
+  NonceSize = 24
+)
+
+func GenerateKey() (*[KeySize]byte, error) {
+  key := new([KeySize]byte)
+  _, err := io.ReadFull(rand.Reader, key[:])
+  if err != nil {
+    return nil, err
+  }
+
+  return key, nil
+}
+
+func GenerateNonce() (*[NonceSize]byte, error) {
+  nonce := new([NonceSize]byte)
+  _, err := io.ReadFull(rand.Reader, nonce[:])
+  if err != nil {
+    return nil, err
+  }
+
+  return nonce, nil
+}
+```
